@@ -2,8 +2,8 @@ import * as input from './2.json';
 import { timer } from '~/util/Timer';
 
 export const restore = (program: number[]) => {
-    program[1] = 1;
-    program[2] = 0;
+    program[1] = 12;
+    program[2] = 2;
     for (let i = 0; i < program.length; i = i + 4) {
         const opcode = program[i];
         if (opcode === 99)
@@ -19,6 +19,3 @@ export const restore = (program: number[]) => {
 console.log(timer.start('2a'));
 console.log(restore(input.data));
 console.log(timer.stop());
-
-// 644274
-// 
