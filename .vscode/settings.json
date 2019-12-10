@@ -7,5 +7,7 @@
     "eslint.validate": [
         "javascript",
         "typescript"
-    ]
+    ],
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "tsimporter.preferRelative": false
 }
