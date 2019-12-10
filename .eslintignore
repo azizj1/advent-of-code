@@ -1,0 +1,5 @@
+node_modules/
+imgs/
+build/
+webpack.config.js
+linter.js

@@ -1,0 +1,11 @@
+{
+    "eslint.enable": true,
+    "eslint.packageManager": "yarn",
+    "eslint.options": {"configFile": ".eslintrc.js"},
+    // "eslint.nodePath": "./js/node_modules",
+    // "eslint.workingDirectories": [{ "directory": "./js", "changeProcessCWD": true }],
+    "eslint.validate": [
+        "javascript",
+        "typescript"
+    ]
+}
