@@ -33,10 +33,12 @@ module.exports = {
         'no-eval': 'error',
         'quotes': ['error', 'single'],
         'radix': 'error',
-        'no-multiple-empty-lines': 'error',
+        'no-multiple-empty-lines': ['error', {'max': 1, 'maxEOF': 0, 'maxBOF': 0}],
         'eol-last': 'error',
         'no-duplicate-imports': 'error',
         'no-dupe-keys': 'error',
-        'semi-style': 'error'
+        'semi-style': 'error',
+        'semi': 'error',
+        'no-multi-spaces': 'error'
     },
 };

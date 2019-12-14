@@ -11,7 +11,7 @@ export const restoreInverse = (output: number) => {
 export const ans = (output: number) => {
     const [noun, verb] = restoreInverse(output);
     return noun * 100 + verb;
-}
+};
 
 console.log(timer.start('2b'));
 console.log(restore(0, 0));
