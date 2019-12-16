@@ -1,25 +1,19 @@
 const path = require('path');
 const webpack = require('webpack');
 const CleanPlugin = require('clean-webpack-plugin');
-const WebpackShellPlugin = require('webpack-shell-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const { spawn } = require('child_process');
 
 const BUILD_DIR = path.join(__dirname, 'build');
-const STATS = {
-    colors: true,
-    reasons: false,
-    hash: false,
-    version: false,
-    timings: true,
-    chunks: false,
-    chunkModules: false,
-    cached: false,
-    cachedAssets: false,
-    children: false,
-    errors: true,
-    errorDetails: true,
-    warnings: true,
-    warningsFilter: /^(?!CriticalDependenciesWarning$)/
+const STATS = 'errors-warnings';
+const chalk = require('chalk');
+
+const shellPlugin = {
+    apply: (compiler) => {
+        compiler.hooks.afterEmit.tap('AfterEmitPlugin', () => {
+            spawn('node', ['build/watch.js'], {shell: true, stdio: 'inherit' });
+          });
+    }
 };
 
 module.exports = function (env) {
@@ -27,7 +21,7 @@ module.exports = function (env) {
     const BABEL_CONFIG = {
         babelrc: false,
         presets: [
-            ['@babel/env', { 'targets': { 'node': '10.17' } }],
+            ['@babel/env', { 'targets': { 'node': 'current' } }],
             ['@babel/typescript']],
         plugins: [
             '@babel/plugin-proposal-class-properties',
@@ -70,25 +64,22 @@ module.exports = function (env) {
         },
         module: {
             rules: [{
-                test: /\.tsx?$/,
-                exclude: [
-                    /node_modules/,
-                    path.join(__dirname, 'vendor')
-                ],
-                use: [
-                    {
-                        loader: 'babel-loader',
-                        options: BABEL_CONFIG
-                    }
-                ]
+                test: /\.tsx?$/i,
+                exclude: [/node_modules/, path.join(__dirname, 'vendor')],
+                use: [{
+                    loader: 'babel-loader',
+                    options: BABEL_CONFIG
+                }]
+            }, {
+                test: /\.txt$/i,
+                exclude: [/node_modules/, path.join(__dirname, 'vendor')],
+                use: 'raw-loader'
             }]
         },
         plugins: [
             new webpack.DefinePlugin(GLOBALS),
             new ForkTsCheckerWebpackPlugin({ eslint: true }),
-            ... DEBUG ? [
-                new WebpackShellPlugin({onBuildExit: ['node ./build/watch.js']})
-            ] : [
+            ... DEBUG ? [shellPlugin] : [
                 new CleanPlugin([BUILD_DIR])
             ]
         ],
