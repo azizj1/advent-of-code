@@ -2,7 +2,7 @@ import { timer } from '~/util/Timer';
 import gridsFile from './10.txt';
 import chalk from 'chalk';
 
-interface IPoint {
+export interface IPoint {
     col: number;
     row: number;
 }
@@ -117,13 +117,13 @@ export const getGridsFromFile = () => {
 export const run = () => {
     const grids = getGridsFromFile();
     for (const grid of grids) {
+        console.log(timer.start(`10a - ${grid.title}`));
         const result = getMaxDetectableAsteroids(grid.grid);
         const asteroids = getAsteroidsAtSlope(grid.grid, result.maxFrom, result.slopesForMax);
-        console.log(timer.start(`10a - ${grid.title}`));
         console.log(toString(grid.grid, result.maxFrom, asteroids));
         console.log(`max detectable asteroids = ${result.maxDetectableAsteroids}`);
         console.log(timer.stop());
     }
 };
 
-run();
+// run();
