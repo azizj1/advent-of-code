@@ -6,7 +6,6 @@ const { spawn } = require('child_process');
 
 const BUILD_DIR = path.join(__dirname, 'build');
 const STATS = 'errors-warnings';
-const chalk = require('chalk');
 
 const shellPlugin = {
     apply: (compiler) => {
@@ -15,6 +14,16 @@ const shellPlugin = {
           });
     }
 };
+
+class Logger {
+    error(...args) {
+        console.error(...args);
+    };
+    warn(...args) {
+        console.warn(...args);
+    };
+    info() {}
+}
 
 module.exports = function (env) {
     const DEBUG = env !== 'prod' && env !== 'dev';
@@ -78,7 +87,7 @@ module.exports = function (env) {
         },
         plugins: [
             new webpack.DefinePlugin(GLOBALS),
-            new ForkTsCheckerWebpackPlugin({ eslint: true }),
+            new ForkTsCheckerWebpackPlugin({ eslint: true, logger: new Logger() }),
             ... DEBUG ? [shellPlugin] : [
                 new CleanPlugin([BUILD_DIR])
             ]

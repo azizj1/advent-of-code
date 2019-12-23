@@ -109,7 +109,7 @@ export const getGridsFromFile = () => {
     for (const match of matches)
         grids.push({
             title: match[1],
-            grid: match[2].match(/[.#]+/ig)?.map(r => r.split('')) ?? []
+            grid: match[2].match(/[.#]+/ig)?.map((r: string) => r.split('')) ?? []
         });
     return grids;
 };

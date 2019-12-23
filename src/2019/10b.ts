@@ -2,7 +2,7 @@ import { getGridsFromFile, getMaxDetectableAsteroids, getAsteroidsAtSlope, IPoin
 import { timer } from '~/util/Timer';
 import chalk from 'chalk';
 
-// clockwise quadrant, top-left is Q1
+// clockwise quadrant, top-right is Q1, bottom-right is Q2, and so on.
 export const getQuadrant = (origin: IPoint) => (point: IPoint) => {
     const dx = point.col - origin.col;
     const dy = point.row - origin.row;

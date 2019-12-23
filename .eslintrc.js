@@ -25,7 +25,7 @@ module.exports = {
         '@typescript-eslint/explicit-function-return-type': 'off',
         '@typescript-eslint/interface-name-prefix': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',
-        'max-len': ['error', {'code': 120, 'ignorePattern': '^\s*console\.log'}],
+        'max-len': ['error', {'code': 120, 'ignorePattern': '^.*console\.log'}],
         'comma-spacing': 'error',
         'no-trailing-spaces': 'error',
         'no-debugger': 'error',
