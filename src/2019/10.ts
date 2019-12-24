@@ -1,5 +1,5 @@
 import { timer } from '~/util/Timer';
-import gridsFile from './10.txt';
+import * as gridsFile from './10.txt';
 import chalk from 'chalk';
 
 export interface IPoint {

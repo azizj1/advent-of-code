@@ -39,7 +39,7 @@ export class IntcodeComputer {
         this.lastOutput = 0;
     }
 
-    next() {
+    private next() {
         const { opcode: code, modes } = IntcodeComputer.getModes(this.program[this.nextIndex]);
         switch(code) {
             case '01': { // add
@@ -135,7 +135,12 @@ export class IntcodeComputer {
         return this.program;
     }
 
-    getIndex(i: number, mode: IMode) {
+    setInput(...inputs: number[]) {
+        this.inputs = inputs;
+        this.inputIndex = 0;
+    }
+
+    private getIndex(i: number, mode: IMode) {
         if (mode === 'immediate')
             return i;
         if (mode === 'position')
@@ -177,4 +182,4 @@ export const test = () => {
     run(input.data, 'input', 1);
 };
 
-test();
+// test();
