@@ -107,17 +107,23 @@ export const getOresForFuel = (graph: WGraph<string, IRatio>) => {
             return;
 
         const reactants = graph.getAdjList(node);
-        let [, have] = needsHaves.get(node)!;
+        const [need, have] = needsHaves.get(node)!;
         const { product: productQuantityMade } = graph.getWeight(node, first(reactants))!;
-        have += productQuantityMade;
+        const multiplier = Math.ceil(need / productQuantityMade);
+
+        const nowHas = have + productQuantityMade * multiplier;
+        needsHaves.set(node, [need, nowHas]);
 
         for (const reactant of reactants) {
             const { reactant: reactantQuantityNeeded } = graph.getWeight(node, reactant)!;
-            let [need] = needsHaves.get(reactant)!;
-            need
+            const [rNeed, rHave] = needsHaves.get(reactant)!;
+            needsHaves.set(reactant, [rNeed + multiplier * reactantQuantityNeeded, rHave]);
+            helper(reactant);
         }
     };
     needsHaves.set(fuel, [1, 1]);
+    helper(fuel);
+    return needsHaves.get(ore);
 };
 
 export const run = () => {
