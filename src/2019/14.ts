@@ -103,34 +103,37 @@ export const getOresForFuel = (graph: WGraph<string, IRatio>) => {
     const needsHaves = new Map(graph.vertices.map<[string, [number, number]]>(v => [v, [0, 0]]));
 
     const helper = (node: string) => {
-        if (graph.getAdjList(node)?.length ?? 0 === 0)
+        if (graph.getAdjList(node).length === 0)
             return;
 
         const reactants = graph.getAdjList(node);
         const [need, have] = needsHaves.get(node)!;
-        const { product: productQuantityMade } = graph.getWeight(node, first(reactants))!;
-        const multiplier = Math.ceil(need / productQuantityMade);
+        if (have > need)
+            return;
 
-        const nowHas = have + productQuantityMade * multiplier;
+        const { product: productMadePerReaction } = graph.getWeight(node, first(reactants))!;
+        const multiplier = Math.ceil((need - have) / productMadePerReaction);
+
+        const nowHas = have + productMadePerReaction * multiplier;
         needsHaves.set(node, [need, nowHas]);
 
         for (const reactant of reactants) {
-            const { reactant: reactantQuantityNeeded } = graph.getWeight(node, reactant)!;
+            const { reactant: reactantNeededPerReaction } = graph.getWeight(node, reactant)!;
             const [rNeed, rHave] = needsHaves.get(reactant)!;
-            needsHaves.set(reactant, [rNeed + multiplier * reactantQuantityNeeded, rHave]);
+            needsHaves.set(reactant, [rNeed + multiplier * reactantNeededPerReaction, rHave]);
             helper(reactant);
         }
     };
-    needsHaves.set(fuel, [1, 1]);
+    needsHaves.set(fuel, [100, 0]);
     helper(fuel);
-    return needsHaves.get(ore);
+    return needsHaves.get(ore)?.[0];
 };
 
 export const run = () => {
-    const sims = getSimulations().slice(0, 1);
+    const sims = getSimulations().slice(-1);
     for (const s of sims) {
         console.log(timer.start(`14 - ${s.name}`));
-        console.log(s.reactions.toString(w => `(${w?.product},${w?.reactant})`));
+        // console.log(s.reactions.toString(w => `(${w?.product},${w?.reactant})`));
         console.log(getOresForFuel(s.reactions));
         console.log(timer.stop());
     }
