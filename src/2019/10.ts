@@ -77,6 +77,7 @@ export const getMaxDetectableAsteroids = (grid: string[][]) => {
 };
 
 export const add = (p1: IPoint) => (p2: IPoint) => ({col: p1.col + p2.col, row: p1.row + p2.row});
+
 export const getAsteroidsAtSlope = (grid: string[][], from: IPoint, slopeKeys: Set<string>) =>
     Array.from(slopeKeys.values())
     .map(fromKey)

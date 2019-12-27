@@ -118,7 +118,10 @@ export class IntcodeComputer {
         return opcode !== '99';
     }
 
-    run() {
+    run(...inputs: number[]) {
+        if (inputs.length > 0)
+            this.setInput(...inputs);
+
         while (this.hasMore()) {
             const { output } = this.next();
             if (!isNaN(output))
