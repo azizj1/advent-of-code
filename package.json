@@ -4,7 +4,8 @@
   "description": "Solutions for https://adventofcode.com/",
   "main": "index.js",
   "scripts": {
-    "watch": "webpack --watch"
+    "watch": "webpack --watch",
+    "start": "webpack --watch"
   },
   "repository": {
     "type": "git",
