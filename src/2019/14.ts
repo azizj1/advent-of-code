@@ -19,7 +19,7 @@ interface IMaterial {
     n: string; // name
 }
 
-interface IRatio {
+export interface IRatio {
     product: number;
     reactant: number;
 }
@@ -97,7 +97,7 @@ export const getOresForFuelDelete = (graph: WGraph<string, IRatio>) => {
     return needs.get(ore);
 };
 
-export const getOresForFuel = (graph: WGraph<string, IRatio>) => {
+export const getOresForFuel = (graph: WGraph<string, IRatio>, fuelNeeded = 1) => {
     const fuel = 'FUEL';
     const ore = 'ORE';
     const needsHaves = new Map(graph.vertices.map<[string, [number, number]]>(v => [v, [0, 0]]));
@@ -124,13 +124,13 @@ export const getOresForFuel = (graph: WGraph<string, IRatio>) => {
             helper(reactant);
         }
     };
-    needsHaves.set(fuel, [100, 0]);
+    needsHaves.set(fuel, [fuelNeeded, 0]);
     helper(fuel);
-    return needsHaves.get(ore)?.[0];
+    return needsHaves.get(ore)?.[0] ?? 0;
 };
 
 export const run = () => {
-    const sims = getSimulations().slice(-1);
+    const sims = getSimulations(); // .slice(0, 1);
     for (const s of sims) {
         console.log(timer.start(`14 - ${s.name}`));
         // console.log(s.reactions.toString(w => `(${w?.product},${w?.reactant})`));
@@ -139,4 +139,4 @@ export const run = () => {
     }
 };
 
-run();
+// run();
