@@ -143,6 +143,10 @@ export class IntcodeComputer {
         this.inputIndex = 0;
     }
 
+    updateProgram(index: number, value: number) {
+        this.program[index] = value;
+    }
+
     private getIndex(i: number, mode: IMode) {
         if (mode === 'immediate')
             return i;

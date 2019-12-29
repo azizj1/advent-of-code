@@ -2,7 +2,7 @@ import { getRunsFromIniFile } from '~/util/util';
 import input from './16.txt';
 import { timer } from '~/util/Timer';
 
-const getPattern = (repeatPerNumber: number, until: number) => {
+export const getPattern = (repeatPerNumber: number, until: number) => {
     const base = [0, 1, 0, -1] as const;
     const result: typeof base[number][] = [];
     let resultIndex = 0;
@@ -39,12 +39,10 @@ export const getSignalsFromFile = () => getRunsFromIniFile(input).map(s => ({
 }));
 
 export const run = () => {
-    const sims = getSignalsFromFile(); // .slice(0, -1);
+    const sims = getSignalsFromFile().slice(-1); // .slice(0, -1);
     for (const s of sims) {
         console.log(timer.start(`16 - ${s.name}`));
         console.log(fft(s.signal, s.numofPhases));
         console.log(timer.stop());
     }
 };
-
-run();

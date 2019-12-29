@@ -70,7 +70,7 @@ export const draw = (comp: IntcodeComputer) => {
     return {grid, oxygenSystem: first(allSteps.sort((a, b) => a.steps - b.steps))};
 };
 
-export const getPaintMark = (mark: IStatus, withColor: boolean) => {
+export const getPaintMark = (withColor: boolean) => (mark: IStatus) => {
     if (withColor) {
         switch (mark) {
             case wall: return '#';
@@ -91,9 +91,9 @@ export const getPaintMark = (mark: IStatus, withColor: boolean) => {
     }
 };
 
-export const coloredGrid = (grid: IStatus[][], withColor = true) => {
+export const coloredGrid = <T>(grid: T[][], getMark: (i: T) => string) => {
     const rowIndices = Object.keys(grid).map(Number).sort((a, b) => a - b);
-    const getColIndices = (row: IStatus[]) => Object.keys(row).map(Number).sort((a, b) => a - b);
+    const getColIndices = (row: T[]) => Object.keys(row).map(Number).sort((a, b) => a - b);
     const minCol = Math.min(...grid.map(getColIndices)[0]);
     const maxCol = Math.max(...last(grid.map(getColIndices)));
 
@@ -102,7 +102,7 @@ export const coloredGrid = (grid: IStatus[][], withColor = true) => {
         const row = grid[rowIndices[i]];
         translatedGrid[i] = [];
         for (let j = 0; j <= maxCol - minCol; j++) {
-            translatedGrid[i][j] = getPaintMark(row[minCol + j], withColor);
+            translatedGrid[i][j] = getMark(row[minCol + j]);
         }
     }
     return translatedGrid;
@@ -141,9 +141,7 @@ export const minsTilOyxgenFilled = (grid: IStatus[][], from: IPoint) => {
 export const run = () => {
     console.log(timer.start('15b'));
     const { grid, oxygenSystem } = draw(new IntcodeComputer(input.data));
-    console.log(toString(coloredGrid(grid)));
+    console.log(toString(coloredGrid(grid, getPaintMark(true))));
     console.log(minsTilOyxgenFilled(grid, oxygenSystem.at));
     console.log(timer.stop());
 };
-
-run();

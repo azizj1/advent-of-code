@@ -1,6 +1,12 @@
 // it's dynamically loaded because it allows us to continue running if there is a runtime error
-try {
-    import(/* webpackChunkName: "problem1" */ './2019/16');
-} catch (e) {
-    console.log(e);
+async function run() {
+    try {
+        // const p1 = await import(/* webpackChunkName: "problem1" */ './2019/16');
+        const p2 = await import(/* webpackChunkName: "problem1" */ './2019/13b');
+        // p1.run();
+        p2.run();
+    } catch (e) {
+        console.log(e);
+    }
 }
+run();
