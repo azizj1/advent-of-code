@@ -12,7 +12,7 @@ interface IGrid {
     title: string;
 }
 
-export const toKey = (point: IPoint) => `${point.col},${point.row}`;
+export const toKey = (point: IPoint | undefined | null) => point == null ? '' : `${point.col},${point.row}`;
 export const fromKey = (key: string) => {
     const [col, row] = key.split(',').map(Number);
     return {col, row};
