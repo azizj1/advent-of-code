@@ -113,10 +113,6 @@ export class PriorityQueue<T> {
         return this.heap.length - 1;
     }
 
-    toString() {
-        return this.heap.slice(1).map(n => n!.val);
-    }
-
     private swap(indexA: number, indexB: number) {
         const temp = this.heap[indexA];
         this.heap[indexA] = this.heap[indexB];

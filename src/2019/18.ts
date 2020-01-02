@@ -2,7 +2,6 @@ import { getRunsFromIniFile } from '~/util/util';
 import input from './18.txt';
 import { IPoint, toKey as toString } from '~/2019/10';
 import { timer } from '~/util/Timer';
-import { PriorityQueue } from '~/util/PriorityQueue';
 
 interface ITunnel {
     name: string;
@@ -52,7 +51,6 @@ const getNeighbors = ({row, col}: IPoint, exclude?: IPoint | null): IPoint[] =>
         getNeighbors({row, col}, null).filter(p => p.row !== exclude.row || p.col !== exclude.col);
 
 export const collectKeys = ({grid, keys, entrance}: ITunnel) => {
-
     const get = ({row, col}: IPoint) => grid[row][col];
     const isValid = (p: IPoint, visited: Set<string>, keysObtained: Set<string>) => {
         const cell = get(p);
@@ -100,14 +98,38 @@ export const collectKeys = ({grid, keys, entrance}: ITunnel) => {
     return helper(entrance, null, new Set(), new Set());
 };
 
+class GenericSet<E> extends Set<E | string | number> {
+    private getHash: (e: E) => string | number;
+
+    constructor(getHash: (e: E) => string | number, data?: E[]) {
+        super();
+        this.getHash = getHash;
+        for (const d of data ?? [])
+            this.add(d);
+    }
+
+    add(e: E) {
+        super.add(this.getHash(e));
+        return this;
+    }
+
+    delete(e: E) {
+        return super.delete(this.getHash(e));
+    }
+
+    has(e: E) {
+        return super.has(this.getHash(e));
+    }
+}
+
 export const getNearestKeysMap = ({grid, keys, doors, entrance}: ITunnel) => {
-    const result = new Map<string, PriorityQueue<{toKey: string; steps: number}>>();
-    const cache: {[toKey: string]: {[fromPoint: string]: number}} = {}; // cache[toKey][fromPoint] = steps;
+    const result = new Map<string, {toKey: string; steps: GenericSet<IPoint>}[]>();
+    const cache: {[toKey: string]: {[fromPoint: string]: IPoint[]}} = {}; // cache[toKey][fromPoint] = steps;
     for (const k of keys.keys()) {
         cache[k] = {};
-        result.set(k, new PriorityQueue(k => k.steps));
+        result.set(k, []);
     }
-    result.set('@', new PriorityQueue(k => k.steps)); // need to add this for entrance
+    result.set('@', []); // need to add this for entrance
 
     const get = ({row, col}: IPoint) => grid[row][col];
     const isValid = (p: IPoint, visited: Set<string>) => {
@@ -122,57 +144,104 @@ export const getNearestKeysMap = ({grid, keys, doors, entrance}: ITunnel) => {
             return false;
         return true;
     };
-    const helper = (start: IPoint, visited: Set<string>, toKey: string): number => {
+    const helper = (start: IPoint, visited: Set<string>, toKey: string): IPoint[] | null => {
         if (!isValid(start, visited))
-            return Infinity;
-        console.log('at', start, 'looking for', toKey);
+            return null;
+        // console.log('at', start, 'looking for', toKey);
         const cell = get(start);
         const pointStr = toString(start);
         if (cache[toKey][pointStr] != null) {
-            console.log('HIT CACHE! from:', start, 'to:', toKey, 'steps:', cache[toKey][pointStr]);
+            // console.log('HIT CACHE! from:', start, 'to:', toKey, 'steps:', cache[toKey][pointStr]);
             return cache[toKey][pointStr];
         }
         if (cell === toKey)
-            return 0;
+            return [];
 
         visited.add(pointStr);
         const neighbors = getNeighbors(start).filter(n => !visited.has(toString(n)));
-        const steps: number[] = [];
-        for (const neighbor of neighbors)
-            steps.push(helper(neighbor, visited, toKey));
+        const allSteps: IPoint[][] = [];
+        for (const neighbor of neighbors) {
+            const steps = helper(neighbor, visited, toKey);
+            if (steps != null)
+                allSteps.push(steps);
+        }
 
-        const minSteps = 1 + Math.min(...steps);
-        cache[toKey][pointStr] = minSteps;
-        console.log('put', cache[toKey][pointStr], 'into cache for toKey =', toKey, 'point =', pointStr);
+        if (allSteps.length === 0)
+            return null;
+
+        const minSteps = allSteps.sort((a, b) => a.length - b.length)[0];
+        minSteps.unshift(start);
+        // cache[toKey][pointStr] = minSteps;
+        // console.log('put', cache[toKey][pointStr], 'into cache for toKey =', toKey, 'point =', pointStr);
         return minSteps;
     };
 
-    for (const k of keys.keys())
-        result.set('@', result.get('@')!.insert({
-            toKey: k,
-            steps: helper(entrance, new Set(), k)
-        }));
+    for (const k of keys.keys()) {
+        const steps = helper(entrance, new Set(), k);
+        if (steps != null)
+            result.get('@')!.push({
+                toKey: k,
+                steps: new GenericSet(toString, steps)
+            });
+    }
+
     for (const fromKey of keys.keys())
         for (const toKey of keys.keys()) {
             if (fromKey === toKey)
                 continue;
             const steps = helper(keys.get(fromKey)!, new Set(), toKey);
+            if (steps == null)
+                continue;
             // if fromKey to toKey is 5 steps, then toKey to fromKey is 5 steps.
-            cache[fromKey][toString(keys.get(toKey))] = steps;
-            result.set(fromKey, result.get(fromKey)!.insert({
+            cache[toKey][toString(keys.get(fromKey))] = [...steps];
+            cache[fromKey][toString(keys.get(toKey))] = [...steps].reverse();
+            result.get(fromKey)!.push({
                 toKey,
-                steps
-            }));
+                steps: new GenericSet(toString, [...steps])
+            });
         }
     return result;
 };
 
+export const getBlocks = (
+    keyToKeySteps: Map<string, {toKey: string; steps: GenericSet<IPoint>}[]>,
+    doors: Map<string, IPoint>
+) => {
+    const blocks = {} as {[fromKey: string]: {[toKey: string]: Set<string>}};
+    const allKeys = keyToKeySteps.keys();
+    for (const fromKey of allKeys)
+        for (const toKey of allKeys) {
+            blocks[fromKey][toKey] = new Set();
+        }
+
+    for (const fromKey of allKeys) {
+        for (const {toKey, steps} of keyToKeySteps.get(fromKey)!) {
+            for (const [door, point] of doors.entries()) {
+                if (steps.has(point))
+                    blocks[fromKey][toKey].add(door);
+            }
+        }
+    }
+    return blocks;
+};
+
+// export const getDoorsNeededUnlockedMap = (doors, )
+
 export const run = () => {
-    const sims = getSimulations().slice(0, 1);
+    const sims = getSimulations().slice(5, 6);
     for (const s of sims) {
-        console.log(timer.start(`18 - ${s.name}`));
-        console.log(s.grid.map(r => r.join(' ')).join('\n'));
-        console.log(Array.from(getNearestKeysMap(s).entries()).reduce((m, [k, v]) => m.set(k, v.toString()), new Map<string, {toKey: string; steps: number}[]>()));
+        console.log(timer.start(`18 - ${s.name}, ${s.keys.size} keys, ${s.doors.size} doors`));
+        // console.log(s.grid.map(r => r.join(' ')).join('\n'));
+        const toPrint =
+            Array.from(getNearestKeysMap(s).entries())
+                .reduce((m, [k, v]) =>
+                    m.set(k, v
+                        .sort((a, b) => a.steps.size - b.steps.size)
+                        .map(p => `${p.toKey}: ${p.steps.size}`)
+                        .join('    ')
+                    ),
+                    new Map<string, string>());
+        console.log(toPrint.get('@'));
         console.log(timer.stop());
     }
 };
