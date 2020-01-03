@@ -203,6 +203,11 @@ export const getNearestKeysMap = ({grid, keys, doors, entrance}: ITunnel) => {
     return result;
 };
 
+
+export const getNearestKeysMap2 = ({grid, keys, doors, entrance}: ITunnel) => {
+    // queue
+};
+
 export const getDoorsNeededUnlockedMap = (
     keyToKeySteps: Map<string, {toKey: string; steps: GenericSet<IPoint>}[]>,
     doors: Map<string, IPoint>
