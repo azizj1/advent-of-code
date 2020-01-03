@@ -1,12 +1,26 @@
-export class GenericSet<E> extends Set<E | string | number> {
-    private getHash: (e: E) => string | number;
+export type HashFunction<E> = (e: E) => string | number;
 
-    constructor(getHash: (e: E) => string | number, data?: E[]) {
+export class GenericSet<E> extends Set<E | string | number> {
+    protected getHash: HashFunction<E>;
+
+    /* eslint-disable no-dupe-class-members */
+    constructor(toClone: GenericSet<E>);
+    constructor(getHash: HashFunction<E>);
+    constructor(getHash: HashFunction<E>, data: E[]);
+    constructor(setOrHash: GenericSet<E> | HashFunction<E>, data?: E[]) {
         super();
-        this.getHash = getHash;
-        for (const d of data ?? [])
-            this.add(d);
+        if (typeof setOrHash === 'function') {
+            this.getHash = setOrHash;
+            for (const d of data ?? [])
+                this.add(d);
+        }
+        else {
+            this.getHash = setOrHash.getHash;
+            for (const d of setOrHash)
+                super.add(d);
+        }
     }
+    /* eslint-enable no-dupe-class-members */
 
     add(e: E) {
         super.add(this.getHash(e));
@@ -19,5 +33,25 @@ export class GenericSet<E> extends Set<E | string | number> {
 
     has(e: E) {
         return super.has(this.getHash(e));
+    }
+
+    hasHash(h: string | number) {
+        return super.has(h);
+    }
+
+    equals(other: GenericSet<E>) {
+        if (this.size !== other.size)
+            return false;
+        for (const item of other.values())
+            if (!super.has(item))
+                return false;
+        return true;
+    }
+
+    subsetOf(parent: GenericSet<E>) {
+        for (const item of this.values())
+            if (!parent.hasHash(item as string | number))
+                return false;
+        return true;
     }
 }

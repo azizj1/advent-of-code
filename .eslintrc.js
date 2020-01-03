@@ -23,7 +23,7 @@ module.exports = {
         // Place to specify ESLint rules. Can be used to overwrite rules specified from the extended configs
         // e.g. "@typescript-eslint/explicit-function-return-type": "off"
         '@typescript-eslint/explicit-function-return-type': 'off',
-        '@typescript-eslint/interface-name-prefix': 'off',
+        '@typescript-eslint/interface-name-prefix': ['error', 'always'],
         '@typescript-eslint/no-non-null-assertion': 'off',
         'max-len': ['error', {'code': 120, 'ignorePattern': '^.*console\.log'}],
         'comma-spacing': 'error',
