@@ -2,6 +2,8 @@ import { getRunsFromIniFile } from '~/util/util';
 import input from './18.txt';
 import { IPoint, toKey as toString } from '~/2019/10';
 import { timer } from '~/util/Timer';
+import { PriorityQueue } from '~/util/PriorityQueue';
+import { GenericSet } from '~/util/GenericSet';
 
 interface ITunnel {
     name: string;
@@ -98,30 +100,6 @@ export const collectKeys = ({grid, keys, entrance}: ITunnel) => {
     return helper(entrance, null, new Set(), new Set());
 };
 
-class GenericSet<E> extends Set<E | string | number> {
-    private getHash: (e: E) => string | number;
-
-    constructor(getHash: (e: E) => string | number, data?: E[]) {
-        super();
-        this.getHash = getHash;
-        for (const d of data ?? [])
-            this.add(d);
-    }
-
-    add(e: E) {
-        super.add(this.getHash(e));
-        return this;
-    }
-
-    delete(e: E) {
-        return super.delete(this.getHash(e));
-    }
-
-    has(e: E) {
-        return super.has(this.getHash(e));
-    }
-}
-
 export const getNearestKeysMap = ({grid, keys, doors, entrance}: ITunnel) => {
     const result = new Map<string, {toKey: string; steps: GenericSet<IPoint>}[]>();
     const cache: {[toKey: string]: {[fromPoint: string]: IPoint[]}} = {}; // cache[toKey][fromPoint] = steps;
@@ -203,9 +181,14 @@ export const getNearestKeysMap = ({grid, keys, doors, entrance}: ITunnel) => {
     return result;
 };
 
-
 export const getNearestKeysMap2 = ({grid, keys, doors, entrance}: ITunnel) => {
-    // queue
+    const queue = new PriorityQueue<{point: IPoint; distance: number}>(p => p.distance);
+    queue.insert({point: entrance, distance: 0});
+
+    while (!queue.isEmpty()) {
+        const {point: p, distance} = queue.poll()!;
+        const neighbors = getNeighbors(p)
+    }
 };
 
 export const getDoorsNeededUnlockedMap = (
