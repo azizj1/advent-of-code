@@ -132,19 +132,19 @@ export const getNearestKeysMap = ({grid, keys, doors, entrance}: ITunnel) => {
     result.set('@', []); // need to add this for entrance
 
     const get = ({row, col}: IPoint) => grid[row][col];
-    const isValid = (p: IPoint, visited: Set<string>) => {
+    const isValid = (p: IPoint, visited: GenericSet<IPoint>) => {
         const cell = get(p);
         if (cell == null ||
             cell !== '.' &&
             cell !== '@' &&
             !equals(keys.get(cell), p) && // stepping on a key is valid
             !equals(doors.get(cell), p) && // stepping on a door is valid. We don't care about doors right now
-            !visited.has(toString(p))
+            !visited.has(p)
         )
             return false;
         return true;
     };
-    const helper = (start: IPoint, visited: Set<string>, toKey: string): IPoint[] | null => {
+    const helper = (start: IPoint, visited: GenericSet<IPoint>, toKey: string): IPoint[] | null => {
         if (!isValid(start, visited))
             return null;
         // console.log('at', start, 'looking for', toKey);
@@ -157,8 +157,8 @@ export const getNearestKeysMap = ({grid, keys, doors, entrance}: ITunnel) => {
         if (cell === toKey)
             return [];
 
-        visited.add(pointStr);
-        const neighbors = getNeighbors(start).filter(n => !visited.has(toString(n)));
+        visited.add(start);
+        const neighbors = getNeighbors(start).filter(n => !visited.has(n));
         const allSteps: IPoint[][] = [];
         for (const neighbor of neighbors) {
             const steps = helper(neighbor, visited, toKey);
@@ -177,7 +177,7 @@ export const getNearestKeysMap = ({grid, keys, doors, entrance}: ITunnel) => {
     };
 
     for (const k of keys.keys()) {
-        const steps = helper(entrance, new Set(), k);
+        const steps = helper(entrance, new GenericSet<IPoint>(toString), k);
         if (steps != null)
             result.get('@')!.push({
                 toKey: k,
@@ -189,7 +189,7 @@ export const getNearestKeysMap = ({grid, keys, doors, entrance}: ITunnel) => {
         for (const toKey of keys.keys()) {
             if (fromKey === toKey)
                 continue;
-            const steps = helper(keys.get(fromKey)!, new Set(), toKey);
+            const steps = helper(keys.get(fromKey)!, new GenericSet<IPoint>(toString), toKey);
             if (steps == null)
                 continue;
             // if fromKey to toKey is 5 steps, then toKey to fromKey is 5 steps.
@@ -203,18 +203,20 @@ export const getNearestKeysMap = ({grid, keys, doors, entrance}: ITunnel) => {
     return result;
 };
 
-export const getBlocks = (
+export const getDoorsNeededUnlockedMap = (
     keyToKeySteps: Map<string, {toKey: string; steps: GenericSet<IPoint>}[]>,
     doors: Map<string, IPoint>
 ) => {
     const blocks = {} as {[fromKey: string]: {[toKey: string]: Set<string>}};
-    const allKeys = keyToKeySteps.keys();
-    for (const fromKey of allKeys)
-        for (const toKey of allKeys) {
+
+    for (const fromKey of keyToKeySteps.keys()) {
+        blocks[fromKey] = {};
+        for (const toKey of keyToKeySteps.keys()) {
             blocks[fromKey][toKey] = new Set();
         }
+    }
 
-    for (const fromKey of allKeys) {
+    for (const fromKey of keyToKeySteps.keys()) {
         for (const {toKey, steps} of keyToKeySteps.get(fromKey)!) {
             for (const [door, point] of doors.entries()) {
                 if (steps.has(point))
@@ -225,23 +227,58 @@ export const getBlocks = (
     return blocks;
 };
 
-// export const getDoorsNeededUnlockedMap = (doors, )
+export const solve = (
+    keyToKeySteps: Map<string, {toKey: string; steps: number}[]>,
+    blockingDoorsBetweenKeys: {[fromKey: string]: {[toKey: string]: Set<string>}}
+) => {
+
+    const getReachableKeys = (fromKey: string, keysObtained: Set<string>) =>
+        keyToKeySteps.get(fromKey)
+        ?.filter(k => !keysObtained.has(k.toKey))
+        ?.filter(k =>
+            blockingDoorsBetweenKeys[fromKey][k.toKey].size === 0 ||
+            Array.from(blockingDoorsBetweenKeys[fromKey][k.toKey].values())
+                .every(b => keysObtained.has(b.toLowerCase())))
+        .sort((a, b) => a.steps - b.steps) ?? [];
+
+    const getCacheKey = (fromKey: string, keysObtained: string) => `${fromKey},${[...keysObtained].sort().toString()}`;
+
+    const helper = (fromKey: string, keysObtained: string, cache: {[keyAndKeys: string]: number}): number => {
+        if (keysObtained.length === keyToKeySteps.size - 1) // minus 1 because @ is in keysToKeysSteps
+            return 0;
+        const cacheKey = getCacheKey(fromKey, keysObtained);
+        if (cache[cacheKey] != null)
+            return cache[cacheKey];
+        // reachableKey either isn't blocked by any door, or if it is blocked by N doors,
+        // all their respective keys are obtained
+        const reachableKeys = getReachableKeys(fromKey, new Set(keysObtained));
+        let totalSteps = Infinity;
+        for (const reachableKey of reachableKeys) {
+            const steps =
+                reachableKey.steps +
+                Math.min(totalSteps, helper(reachableKey.toKey, keysObtained + reachableKey.toKey, cache));
+            totalSteps = Math.min(totalSteps, steps);
+        }
+        cache[cacheKey] = totalSteps;
+        return totalSteps;
+    };
+
+    return helper('@', '', {});
+};
 
 export const run = () => {
-    const sims = getSimulations().slice(5, 6);
+    const sims = getSimulations().slice(0, 6);
     for (const s of sims) {
         console.log(timer.start(`18 - ${s.name}, ${s.keys.size} keys, ${s.doors.size} doors`));
-        // console.log(s.grid.map(r => r.join(' ')).join('\n'));
-        const toPrint =
-            Array.from(getNearestKeysMap(s).entries())
-                .reduce((m, [k, v]) =>
-                    m.set(k, v
-                        .sort((a, b) => a.steps.size - b.steps.size)
-                        .map(p => `${p.toKey}: ${p.steps.size}`)
-                        .join('    ')
-                    ),
-                    new Map<string, string>());
-        console.log(toPrint.get('@'));
+        console.log(s.grid.map(r => r.join(' ')).join('\n'));
+        const keysToKeys = getNearestKeysMap(s);
+        const simpleKeysToKeys = new Map(
+            Array.from(keysToKeys.entries())
+            .map(([k, s]) => [
+                k,
+                s.map(v => ({toKey: v.toKey, steps: v.steps.size}))
+            ]));
+        console.log(solve(simpleKeysToKeys, getDoorsNeededUnlockedMap(keysToKeys, s.doors)));
         console.log(timer.stop());
     }
 };
