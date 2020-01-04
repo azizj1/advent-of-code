@@ -4,7 +4,6 @@ import { IPoint, toKey as toString } from '~/2019/10';
 import { timer } from '~/util/Timer';
 import { PriorityQueue } from '~/util/PriorityQueue';
 import { GenericSet } from '~/util/GenericSet';
-import chalk from 'chalk';
 
 interface ITunnel {
     name: string;
@@ -215,7 +214,7 @@ export const makeAddPointInfo = ({grid, keys, doors}: ITunnel) => (p: IPoint) =>
 export const getDistancesToAllKeys = (from: IPoint, tunnel: ITunnel) => {
     const queue = new PriorityQueue<IPriorityQueueState>(p => -1 * p.distance);
     const visited = new GenericSet<IPoint>(toString);
-    const result: {toKey: string; steps: number; doorsInWay: GenericSet<string>}[] = [];
+    const result: {toKey: string; steps: number; doorsInWay: GenericSet<string>; keysInWay: GenericSet<string>}[] = [];
     const isValid = makeIsValid(tunnel)(visited);
     const addPointInfo = makeAddPointInfo(tunnel);
 
@@ -245,7 +244,14 @@ export const getDistancesToAllKeys = (from: IPoint, tunnel: ITunnel) => {
             });
             visited.add(neighbor.point);
             if (neighbor.key != null) {
-                result.push({toKey: neighbor.key, steps: distance + 1, doorsInWay: new GenericSet(doorsInWay)});
+                const keysInWay = new GenericSet(keysObtained);
+                keysInWay.delete(neighbor.key);
+                result.push({
+                    toKey: neighbor.key,
+                    steps: distance + 1,
+                    doorsInWay: new GenericSet(doorsInWay),
+                    keysInWay
+                });
             }
         }
     }
@@ -259,29 +265,38 @@ export const getNearestKeysMap2 = (tunnel: ITunnel) => {
     ).set('@', getDistancesToAllKeys(entrance, tunnel));
 };
 
-type KeyToKeyMap = Map<string, {toKey: string; steps: number; doorsInWay: GenericSet<string>}[]>;
+type KeyToKeyMap = Map<
+    string,
+    {toKey: string; steps: number; doorsInWay: GenericSet<string>; keysInWay: GenericSet<string>}[]
+>;
 
 export const makeGetReachableKeys =
     (keyToKeyMap: KeyToKeyMap) =>
     (fromKey: string, keysObtained: GenericSet<string>) =>
         keyToKeyMap.get(fromKey)
             ?.filter(k => !keysObtained.has(k.toKey))
-            ?.filter(k => k.doorsInWay.subsetOf(keysObtained)) ?? [];
+            ?.filter(k => k.doorsInWay.subsetOf(keysObtained, k => k.toString().toLowerCase()))
+            ?.filter(k => k.keysInWay.subsetOf(keysObtained)) ?? [];
+            // if you skip over keysInWay, you'e looking at a suboptiaml route
 
 export const solve = (keyToKeyMap: KeyToKeyMap) => {
     const getReachableKeys = makeGetReachableKeys(keyToKeyMap);
     const getCacheKey = (fromKey: string, keysObtained: string) => `${fromKey},${[...keysObtained].sort().toString()}`;
     const cache: {[key: string]: number} = {};
 
+    let count = 0;
     const helper = (fromKey: string, keysObtained: string): number => {
-        if (keysObtained.length === keyToKeyMap.size - 1) // minus 1 because @ is in keysToKeysSteps
+        if (keysObtained.length === keyToKeyMap.size - 1) {
+            // console.log('count', count);
             return 0;
+        } // minus 1 because @ is in keysToKeysSteps
         const cacheKey = getCacheKey(fromKey, keysObtained);
         if (cache[cacheKey] != null)
             return cache[cacheKey];
-
+        count++;
+        console.log('atKey:', fromKey, 'keysObtained', keysObtained);
         // has to be uppercased so it can be compared against doors
-        const reachableKeys = getReachableKeys(fromKey, new GenericSet(k => k.toUpperCase(), [...keysObtained]));
+        const reachableKeys = getReachableKeys(fromKey, new GenericSet(k => k, [...keysObtained]));
         let totalSteps = Infinity;
         for (const reachableKey of reachableKeys) {
             const steps =
@@ -293,49 +308,58 @@ export const solve = (keyToKeyMap: KeyToKeyMap) => {
         return totalSteps;
     };
 
-    return helper('@', '');
+    const x = helper('@', '');
+    console.log('count', count);
+    return x;
 };
+
 const getCacheKey = (fromKey: string, keysObtained: string) => `${fromKey},${[...keysObtained].sort().toString()}`;
 
 export const solve2 = (keytoKeyMap: KeyToKeyMap) => {
     type QueueState = {totalSteps: number; keysObtained: string; atKey: string};
-    const queue = new PriorityQueue<QueueState>(p => -1 * p.totalSteps);
-    const visited = new Set<string>();
+    const queue = new PriorityQueue<QueueState>(p => -1 * (p.totalSteps + 0));
+    const visited = new Map<string, number>();
     const getReachableKeys = makeGetReachableKeys(keytoKeyMap);
-
+    let count = 0;
+    let minSteps = Infinity;
     queue.insert({totalSteps: 0, keysObtained: '', atKey: '@'});
     while (!queue.isEmpty()) {
+        count++;
         const { totalSteps, keysObtained, atKey } = queue.poll()!;
-        // console.log('atKey:', atKey, 'keysObtained', keysObtained, 'totalSteps:', totalSteps);
+        // console.log('atKey:', atKey, 'keysObtained', keysObtained, 'totalSteps:', totalSteps, 'queueSize', queue.size());
         if (keysObtained.length === keytoKeyMap.size - 1) {
-            return totalSteps;
+            // console.log('count', count, 'queueSize', queue.size());
+            minSteps = Math.min(totalSteps, minSteps);
         }
 
-        const reachableKeys = getReachableKeys(atKey, new GenericSet(k => k.toUpperCase(), [...keysObtained]));
+        const reachableKeys = getReachableKeys(atKey, new GenericSet(k => k, [...keysObtained]));
+        // console.log(`\treachable=${reachableKeys.map(k => k.toKey)}`);
+
         for (const key of reachableKeys) {
             const newKeysObtained = keysObtained + key.toKey;
             const newCacheKey = getCacheKey(key.toKey, newKeysObtained);
-            if (!visited.has(newCacheKey)) {
+            const newTotalSteps = totalSteps + key.steps;
+            if (!visited.has(newCacheKey) || visited.get(newCacheKey)! > newTotalSteps) {
                 queue.insert({
                     totalSteps: totalSteps + key.steps,
                     atKey: key.toKey,
                     keysObtained: newKeysObtained
                 });
-                visited.add(newCacheKey);
+                visited.set(newCacheKey, newTotalSteps);
             }
         }
-
     }
-    return Infinity;
+    console.log('iterations =', count);
+    return minSteps;
 };
 
 export const run = () => {
     console.log('STARTING');
-    const sims = getSimulations().slice(0, 6);
+    const sims = getSimulations();
     for (const s of sims) {
         const d = getNearestKeysMap2(s);
 
-        console.log(timer.start(`18 ${chalk.magenta('SOLVA')} - ${s.name}, ${s.keys.size} keys, ${s.doors.size} doors`));
+        console.log(timer.start(`18 - ${s.name}, ${s.keys.size} keys, ${s.doors.size} doors`));
         // console.log(s.grid.map(r => r.join(' ')).join('\n'));
         // const keysToKeys = getNearestKeysMap(s);
         // const simpleKeysToKeys = new Map(
@@ -346,9 +370,12 @@ export const run = () => {
         //     ]));
         // console.log(simpleKeysToKeys.get('@')?.sort((a, b) => a.steps - b.steps).map(a => `${a.toKey}: ${a.steps}`).join('   '));
         // console.log(solve(simpleKeysToKeys, getDoorsNeededUnlockedMap(keysToKeys, s.doors)));
-        // console.log(d.get('@')?.map(a => `${a.toKey}: ${a.steps}`).join('   '));
-        // console.log(solve(d));
-        console.log(solve(d));
+        // Array.from(d.keys()).forEach(k =>
+        //     console.log(`key=${k}\t`, d.get(k)?.map(a => `${a.toKey}: ${a.steps} (${Array.from(a.keysInWay.values()).concat(Array.from(a.doorsInWay.values()))})`).join('   '))
+        // );
+        // console.log(d.get('@')?.map(a => `${a.toKey}: ${a.steps} (${Array.from(a.keysInWay.values())})`).join('   '));
+        console.log('answer =', solve2(d));
+        // console.log(solve2(d));
         console.log(timer.stop());
     }
 };

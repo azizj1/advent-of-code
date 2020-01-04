@@ -48,9 +48,11 @@ export class GenericSet<E> extends Set<E | string | number> {
         return true;
     }
 
-    subsetOf(parent: GenericSet<E>) {
+    subsetOf(parent: GenericSet<E>, hashMapperOnSubset?: (i: string | number) => string | number) {
+        if (hashMapperOnSubset == null)
+            hashMapperOnSubset = i => i;
         for (const item of this.values())
-            if (!parent.hasHash(item as string | number))
+            if (!parent.hasHash(hashMapperOnSubset(item as string | number) as string | number))
                 return false;
         return true;
     }
