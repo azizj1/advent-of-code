@@ -6,8 +6,8 @@ export class GenericSet<E> extends Set<E | string | number> {
     /* eslint-disable no-dupe-class-members */
     constructor(toClone: GenericSet<E>);
     constructor(getHash: HashFunction<E>);
-    constructor(getHash: HashFunction<E>, data: E[]);
-    constructor(setOrHash: GenericSet<E> | HashFunction<E>, data?: E[]) {
+    constructor(getHash: HashFunction<E>, data: E[] | IterableIterator<E>);
+    constructor(setOrHash: GenericSet<E> | HashFunction<E>, data?: E[] | IterableIterator<E>) {
         super();
         if (typeof setOrHash === 'function') {
             this.getHash = setOrHash;

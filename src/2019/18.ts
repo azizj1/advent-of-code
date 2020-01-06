@@ -75,9 +75,6 @@ export const collectKeys = ({grid, keys, entrance}: ITunnel) => {
         if (!isValid(start, visited, keysObtained))
             return Infinity;
 
-        // if (from != null && from.col === entrance.col && from.row === entrance.row && keysObtained.size === 0) {
-        //     console.log('STARTING OVER');
-        // }
         const cell = get(start);
         let onKey = false;
 
@@ -342,7 +339,7 @@ export const solve2 = (keytoKeyMap: Map<string, IKeyToKeyInfo[]>) => {
             const newTotalSteps = totalSteps + key.steps;
             if (!visited.has(newCacheKey) || visited.get(newCacheKey)! > newTotalSteps) {
                 queue.enqueue({
-                    totalSteps: totalSteps + key.steps,
+                    totalSteps: newTotalSteps,
                     atKey: key.toKey,
                     keysObtained: newKeysObtained
                 });

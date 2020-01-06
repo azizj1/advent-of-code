@@ -8,3 +8,14 @@ export const getRunsFromIniFile = (content: string) =>
             content: run[2]
         })
 );
+
+let savedConsoleInfo: ((message?: string) => void) | null = null;
+export const dropConsoleInfo = () => {
+    savedConsoleInfo = console.info;
+    console.info = () => void 0;
+};
+
+export const resetConsoleInfo = () => {
+    if (savedConsoleInfo != null)
+        console.info = savedConsoleInfo;
+};
