@@ -43,16 +43,16 @@ type PriorityFunction<T> = (item: T) => number;
 export class PriorityQueue<T> {
     // first element is null, rest is type of Node<T>. Why is the first element null? See poll()
     private heap: [null, ...Array<Node<T>>];
-    private comparator: PriorityFunction<T>;
+    private prioritizer: PriorityFunction<T>;
 
     constructor(comparator: PriorityFunction<T>) {
         this.heap = [null];
-        this.comparator = comparator;
+        this.prioritizer = comparator;
     }
 
     // O(log N)
-    insert(item: T) {
-        const priority = this.comparator(item);
+    enqueue(item: T) {
+        const priority = this.prioritizer(item);
         const node = new Node(item, priority);
         this.heap.push(node);
         let nodeIndex = this.heap.length - 1;
@@ -76,7 +76,7 @@ export class PriorityQueue<T> {
     // which is where X's children will be.
     // This also explains why the first element is NULL. With the first element starting at index = 1, we can find its
     // children by doing 2*1 and 2*1 + 1. If first element was at index = 0, we'd be screwed, because 2*0 = 0
-    poll() {
+    dequeue() {
         if (this.heap.length <= 2) { // i.e, there is only 1 element. [null, singleElement]
             const removedElement = this.heap.pop();
             this.heap[0] = null;
@@ -101,16 +101,46 @@ export class PriorityQueue<T> {
         return this.heap[1] != null ? this.heap[1].val : null;
     }
 
-    toArray() {
-        return this.heap.slice(1).map(m => m!.val);
-    }
-
     isEmpty() {
         return this.heap.length <= 1;
     }
 
     size() {
         return this.heap.length - 1;
+    }
+
+    set values(items: T[]) {
+        this.heap = [null, ...items.map(v => new Node(v, this.prioritizer(v)))];
+        this.heapify();
+    }
+
+    get values() {
+        return this.heap.slice(1).map(v => v!.val);
+    }
+
+    // O(N) - see CLRS book.
+    heapify() {
+        const n = this.heap.length;
+        const helper = (parentIndex: number) => {
+            let largestIndex = parentIndex;
+            const leftChildIndex = parentIndex * 2;
+            const rightChildIndex = parentIndex * 2 + 1;
+
+            if (leftChildIndex < n && this.heap[leftChildIndex]!.priority > this.heap[largestIndex]!.priority)
+                largestIndex = leftChildIndex;
+            if (rightChildIndex < n && this.heap[rightChildIndex]!.priority > this.heap[largestIndex]!.priority)
+                largestIndex = rightChildIndex;
+
+            if (largestIndex !== parentIndex) {
+                this.swap(parentIndex, largestIndex);
+                helper(largestIndex);
+            }
+        };
+
+        for (let i = 1; i < n; i++)
+            this.heap[i]!.priority = this.prioritizer(this.heap[i]!.val);
+        for (let i = Math.floor((n - 1) / 2); i > 0; i--)
+            helper(i);
     }
 
     private swap(indexA: number, indexB: number) {

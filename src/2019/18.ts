@@ -5,11 +5,14 @@ import { timer } from '~/util/Timer';
 import { PriorityQueue } from '~/util/PriorityQueue';
 import { GenericSet } from '~/util/GenericSet';
 
-interface ITunnel {
+export interface IBaseTunnel {
     name: string;
     grid: string[][];
     keys: Map<string, IPoint>;
     doors: Map<string, IPoint>;
+}
+
+interface ITunnel extends IBaseTunnel {
     entrance: IPoint;
 }
 
@@ -188,7 +191,7 @@ interface IPriorityQueueState {
     doorsInWay: GenericSet<string>;
 }
 
-export const makeIsValid = ({grid, keys, doors}: ITunnel) => (visited: GenericSet<IPoint>) => (p: IPoint) => {
+export const makeIsValid = ({grid, keys, doors}: IBaseTunnel) => (visited: GenericSet<IPoint>) => (p: IPoint) => {
     const cell = grid[p.row][p.col];
     if (cell == null ||
         visited.has(p) ||
@@ -201,7 +204,7 @@ export const makeIsValid = ({grid, keys, doors}: ITunnel) => (visited: GenericSe
     return true;
 };
 
-export const makeAddPointInfo = ({grid, keys, doors}: ITunnel) => (p: IPoint) => {
+export const makeAddPointInfo = ({grid, keys, doors}: IBaseTunnel) => (p: IPoint) => {
     const cell = grid[p.row][p.col];
     return {
         point: p,
@@ -211,18 +214,18 @@ export const makeAddPointInfo = ({grid, keys, doors}: ITunnel) => (p: IPoint) =>
 };
 
 // will return all short and long paths fromKey to toKey
-export const getDistancesToAllKeys = (from: IPoint, tunnel: ITunnel) => {
+export const getDistancesToAllKeys = (from: IPoint, tunnel: IBaseTunnel) => {
     const queue = new PriorityQueue<IPriorityQueueState>(p => -1 * p.distance);
     const visited = new GenericSet<IPoint>(toString);
     const result: {toKey: string; steps: number; doorsInWay: GenericSet<string>; keysInWay: GenericSet<string>}[] = [];
     const isValid = makeIsValid(tunnel)(visited);
     const addPointInfo = makeAddPointInfo(tunnel);
 
-    queue.insert({point: from, distance: 0, keysObtained: new GenericSet(s => s), doorsInWay: new GenericSet(s => s)});
+    queue.enqueue({point: from, distance: 0, keysObtained: new GenericSet(s => s), doorsInWay: new GenericSet(s => s)});
     visited.add(from);
 
     while (!queue.isEmpty()) {
-        const {point, distance, keysObtained, doorsInWay} = queue.poll()!;
+        const {point, distance, keysObtained, doorsInWay} = queue.dequeue()!;
         const neighbors = getNeighbors(point)
             .filter(isValid)
             .map(addPointInfo);
@@ -236,7 +239,7 @@ export const getDistancesToAllKeys = (from: IPoint, tunnel: ITunnel) => {
             if (neighbor.key != null)
                 newKeysObtained.add(neighbor.key);
 
-            queue.insert({
+            queue.enqueue({
                 point: neighbor.point,
                 distance: distance + 1,
                 keysObtained: newKeysObtained,
@@ -265,13 +268,15 @@ export const getNearestKeysMap2 = (tunnel: ITunnel) => {
     ).set('@', getDistancesToAllKeys(entrance, tunnel));
 };
 
-type KeyToKeyMap = Map<
-    string,
-    {toKey: string; steps: number; doorsInWay: GenericSet<string>; keysInWay: GenericSet<string>}[]
->;
+export interface IKeyToKeyInfo {
+    toKey: string;
+    steps: number;
+    doorsInWay: GenericSet<string>;
+    keysInWay: GenericSet<string>;
+}
 
 export const makeGetReachableKeys =
-    (keyToKeyMap: KeyToKeyMap) =>
+    (keyToKeyMap: Map<string, IKeyToKeyInfo[]>) =>
     (fromKey: string, keysObtained: GenericSet<string>) =>
         keyToKeyMap.get(fromKey)
             ?.filter(k => !keysObtained.has(k.toKey))
@@ -279,7 +284,7 @@ export const makeGetReachableKeys =
             ?.filter(k => k.keysInWay.subsetOf(keysObtained)) ?? [];
             // if you skip over keysInWay, you'e looking at a suboptiaml route
 
-export const solve = (keyToKeyMap: KeyToKeyMap) => {
+export const solve = (keyToKeyMap: Map<string, IKeyToKeyInfo[]>) => {
     const getReachableKeys = makeGetReachableKeys(keyToKeyMap);
     const getCacheKey = (fromKey: string, keysObtained: string) => `${fromKey},${[...keysObtained].sort().toString()}`;
     const cache: {[key: string]: number} = {};
@@ -313,34 +318,30 @@ export const solve = (keyToKeyMap: KeyToKeyMap) => {
     return x;
 };
 
-const getCacheKey = (fromKey: string, keysObtained: string) => `${fromKey},${[...keysObtained].sort().toString()}`;
+export const getCacheKey = (fromKey: string, keysObtained: string) =>
+    `${fromKey},${[...keysObtained].sort().toString()}`;
 
-export const solve2 = (keytoKeyMap: KeyToKeyMap) => {
+export const solve2 = (keytoKeyMap: Map<string, IKeyToKeyInfo[]>) => {
     type QueueState = {totalSteps: number; keysObtained: string; atKey: string};
-    const queue = new PriorityQueue<QueueState>(p => -1 * (p.totalSteps + 0));
+    const queue = new PriorityQueue<QueueState>(p => -1 * p.totalSteps);
     const visited = new Map<string, number>();
     const getReachableKeys = makeGetReachableKeys(keytoKeyMap);
-    let count = 0;
     let minSteps = Infinity;
-    queue.insert({totalSteps: 0, keysObtained: '', atKey: '@'});
+
+    queue.enqueue({totalSteps: 0, keysObtained: '', atKey: '@'});
     while (!queue.isEmpty()) {
-        count++;
-        const { totalSteps, keysObtained, atKey } = queue.poll()!;
-        // console.log('atKey:', atKey, 'keysObtained', keysObtained, 'totalSteps:', totalSteps, 'queueSize', queue.size());
+        const { totalSteps, keysObtained, atKey } = queue.dequeue()!;
         if (keysObtained.length === keytoKeyMap.size - 1) {
-            // console.log('count', count, 'queueSize', queue.size());
             minSteps = Math.min(totalSteps, minSteps);
         }
 
         const reachableKeys = getReachableKeys(atKey, new GenericSet(k => k, [...keysObtained]));
-        // console.log(`\treachable=${reachableKeys.map(k => k.toKey)}`);
-
         for (const key of reachableKeys) {
             const newKeysObtained = keysObtained + key.toKey;
             const newCacheKey = getCacheKey(key.toKey, newKeysObtained);
             const newTotalSteps = totalSteps + key.steps;
             if (!visited.has(newCacheKey) || visited.get(newCacheKey)! > newTotalSteps) {
-                queue.insert({
+                queue.enqueue({
                     totalSteps: totalSteps + key.steps,
                     atKey: key.toKey,
                     keysObtained: newKeysObtained
@@ -349,7 +350,6 @@ export const solve2 = (keytoKeyMap: KeyToKeyMap) => {
             }
         }
     }
-    console.log('iterations =', count);
     return minSteps;
 };
 
