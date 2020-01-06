@@ -68,18 +68,16 @@ const getAllValuesExcludingKey = (keyToExclude: string, allKeys: Map<string, str
     return values;
 };
 
-export const solve = (keytoKeyMap: Map<string, IKeyToKeyInfo[]>, entrances: Map<string, IPoint>) => {
-    let failureWeight = 10000;
-    type QueueState = {totalSteps: number; keysObtained: string; atKey: string; failedAttempts?: number};
-    // the prioritizer function is called only when an empty is inserted, so we increment failureWeight every time
-    // a failedAttempt is added, to make sure its added at the bottom of the queue.
-    const queue = new PriorityQueue<QueueState>(p => p.failedAttempts != null ? -1 * (failureWeight++) : -p.totalSteps);
+export const lowerBound = (keytoKeyMap: Map<string, IKeyToKeyInfo[]>, entrances: Map<string, IPoint>) => {
+    type QueueState = {totalSteps: number; keysObtained: string; atKey: string};
+    const queue = new PriorityQueue<QueueState>(p => -1 * p.totalSteps);
     const visited = new Map<string, number>();
     const getReachableKeys = makeGetReachableKeys(keytoKeyMap);
-    const keyToQuadrantMap = getKeyToEntranceMap(keytoKeyMap, entrances); // key to entrance it belongs to
-    const quadrantLastKeysObtained = new Map(Array.from(entrances.keys()).map(k => [
+    const keyToQuadrantMap = getKeyToEntranceMap(keytoKeyMap, entrances); // The entrance a key belongs to
+    // all the keys that will be obtained in a quadrant.
+    const allKeysInQuadrant = new Map(Array.from(entrances.keys()).map(k => [
         k, // key of the Map
-        keytoKeyMap.get(k)!.map(k1 => k1.toKey).join('') // all keys reachable by entrance, regardless of doors in way
+        keytoKeyMap.get(k)!.map(k1 => k1.toKey).join('')
     ]));
     const keysPerQuadrant = new Map(Array.from(entrances.keys()).map(k => [k, keytoKeyMap.get(k)!.length]));
     const minSteps = new Map(Array.from(entrances.keys()).map(k => [k, Infinity]));
@@ -88,7 +86,7 @@ export const solve = (keytoKeyMap: Map<string, IKeyToKeyInfo[]>, entrances: Map<
         queue.enqueue({totalSteps: 0, keysObtained: '', atKey: e});
 
     while (!queue.isEmpty()) {
-        const { totalSteps, keysObtained, atKey, failedAttempts = 0 } = queue.dequeue()!;
+        const { totalSteps, keysObtained, atKey } = queue.dequeue()!;
         const quadrant = keyToQuadrantMap.get(atKey)!;
 
         if (keysObtained.length === keysPerQuadrant.get(quadrant)) {
@@ -96,20 +94,9 @@ export const solve = (keytoKeyMap: Map<string, IKeyToKeyInfo[]>, entrances: Map<
             minSteps.set(quadrant, Math.min(currMinSteps, totalSteps));
         }
 
-        const keysObtainedOtherQuadrants = getAllValuesExcludingKey(quadrant, quadrantLastKeysObtained);
+        const keysObtainedOtherQuadrants = getAllValuesExcludingKey(quadrant, allKeysInQuadrant);
         const keysObtainedSet = new GenericSet(k => k, [...keysObtained, ...keysObtainedOtherQuadrants]);
         const reachableKeys = getReachableKeys(atKey, keysObtainedSet);
-
-        if (reachableKeys.length === 0 && failedAttempts < 10) {
-            const hasKeysToGetInFuture = keytoKeyMap.get(atKey)!.filter(k => !keysObtainedSet.has(k.toKey)).length > 0;
-            if (hasKeysToGetInFuture) {
-                console.info(`\tadding ${atKey} (${entrances.get(atKey)?.col},${entrances.get(atKey)?.row}) to failed`);
-                queue.enqueue({ totalSteps, keysObtained, atKey, failedAttempts: failedAttempts + 1 });
-            }
-        }
-        if (reachableKeys.length === 0 && failedAttempts >= 10) {
-            console.info(`${atKey} has failed ${failedAttempts} times. It is now discarded`);
-        }
 
         for (const key of reachableKeys) {
             const newKeysObtained = keysObtained + key.toKey;
@@ -125,7 +112,6 @@ export const solve = (keytoKeyMap: Map<string, IKeyToKeyInfo[]>, entrances: Map<
             }
         }
     }
-    console.log(minSteps);
     return Array.from(minSteps.values()).reduce((a, c) => a + c, 0);
 };
 
@@ -161,26 +147,23 @@ export const combinations = <T>(keysReachableKeys: T[][]) => {
     return solutions;
 };
 
-export const solve2 = (keytoKeyMap: Map<string, IKeyToKeyInfo[]>, entrances: Map<string, IPoint>) => {
-    type QueueState = {totalSteps: number; atKeys: string[]; allKeysObtained: string};
+export const solve = (keytoKeyMap: Map<string, IKeyToKeyInfo[]>, entrances: Map<string, IPoint>) => {
+    type QueueState = {totalSteps: number; atKeys: string[]; keysObtained: string};
     const queue = new PriorityQueue<QueueState>(p => -1 * p.totalSteps);
     const visited = new Map<string, number>();
     const getReachableKeys = makeGetReachableKeys(keytoKeyMap);
-    let minSteps = Infinity;
 
     queue.enqueue({
         totalSteps: 0,
         atKeys: Array.from(entrances.keys()),
-        allKeysObtained: ''
+        keysObtained: ''
     });
     while (!queue.isEmpty()) {
-        const { totalSteps, atKeys, allKeysObtained } = queue.dequeue()!;
-        console.info('atKey:', atKeys, 'keysObtained', allKeysObtained, 'totalSteps:', totalSteps);
-        if (allKeysObtained.length === keytoKeyMap.size - entrances.size) {
-            minSteps = Math.min(totalSteps, minSteps);
-            continue;
-        }
-        const keysObtainedSet = new GenericSet(k => k, [...allKeysObtained]);
+        const { totalSteps, atKeys, keysObtained } = queue.dequeue()!;
+        if (keysObtained.length === keytoKeyMap.size - entrances.size)
+            return totalSteps;
+
+        const keysObtainedSet = new GenericSet(k => k, [...keysObtained]);
         const allRouteOptionsForAllRobots =
             combinations(
                 // we're adding the current key to reachable keys to include the option of "staying put"
@@ -194,7 +177,7 @@ export const solve2 = (keytoKeyMap: Map<string, IKeyToKeyInfo[]>, entrances: Map
             const newKeysObtained = Array.from(new GenericSet(k => k,
                 robotsMoveToKey
                     .filter(k => !entrances.has(k))
-                    .concat([...allKeysObtained]))
+                    .concat([...keysObtained]))
                 .values()).join('');
             const newCacheKey = getCacheKey(robotsMoveToKey.join(''), newKeysObtained);
             const newTotalSteps = routeOptionForAllRobots.reduce((a, c) => a + c.steps, totalSteps);
@@ -202,13 +185,13 @@ export const solve2 = (keytoKeyMap: Map<string, IKeyToKeyInfo[]>, entrances: Map
                 queue.enqueue({
                     totalSteps: newTotalSteps,
                     atKeys: robotsMoveToKey,
-                    allKeysObtained: newKeysObtained
+                    keysObtained: newKeysObtained
                 });
                 visited.set(newCacheKey, newTotalSteps);
             }
         }
     }
-    return minSteps;
+    return Infinity;
 };
 
 export const run = () => {
@@ -219,11 +202,7 @@ export const run = () => {
         const d = getNearestKeysMap(s);
         // console.log(s.grid.map(r => r.join(' ')).join('\n'));
         console.log(timer.start(`18b - ${s.name}, ${s.keys.size} keys, ${s.doors.size} doors`));
-        Array.from(d.keys()).forEach(k =>
-            console.info(`key=${k}\t`, d.get(k)?.map(a => `${a.toKey}: ${a.steps} (${Array.from(a.keysInWay.values()).concat(Array.from(a.doorsInWay.values()))})`).join('   '))
-        );
-        console.log('entrances', s.entrances);
-        console.log(chalk.redBright('answer ='), solve2(d, s.entrances));
+        console.log(chalk.redBright('answer ='), lowerBound(d, s.entrances));
         console.log(timer.stop());
     }
     resetConsoleInfo();

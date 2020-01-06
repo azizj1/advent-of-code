@@ -16,6 +16,20 @@ interface ITunnel extends IBaseTunnel {
     entrance: IPoint;
 }
 
+interface IPriorityQueueState {
+    point: IPoint;
+    distance: number;
+    keysObtained: GenericSet<string>;
+    doorsInWay: GenericSet<string>;
+}
+
+export interface IKeyToKeyInfo {
+    toKey: string;
+    steps: number;
+    doorsInWay: GenericSet<string>;
+    keysInWay: GenericSet<string>;
+}
+
 export const toTunnel = ({name, grid}: {name: string; grid: string[][]}): ITunnel => {
     const keys = new Map<string, IPoint>();
     const doors = new Map<string, IPoint>();
@@ -39,7 +53,7 @@ export const toTunnel = ({name, grid}: {name: string; grid: string[][]}): ITunne
     };
 };
 
-export const getSimulations = () => getRunsFromIniFile(input)
+const getSimulations = () => getRunsFromIniFile(input)
     .map(s => ({
         name: s.name,
         grid: s.content.split(/\r?\n/).filter(s => s.trim() !== '').map(r => r.split(''))
@@ -54,139 +68,6 @@ const getNeighbors = ({row, col}: IPoint, exclude?: IPoint | null): IPoint[] =>
     exclude == null ?
         [{row: row - 1, col}, {row: row + 1, col}, {row, col: col + 1}, {row, col: col - 1}] :
         getNeighbors({row, col}, null).filter(p => p.row !== exclude.row || p.col !== exclude.col);
-
-export const collectKeys = ({grid, keys, entrance}: ITunnel) => {
-    const get = ({row, col}: IPoint) => grid[row][col];
-    const isValid = (p: IPoint, visited: Set<string>, keysObtained: Set<string>) => {
-        const cell = get(p);
-        const pHash = toString(p);
-        if (cell == null ||
-            cell !== '.' &&
-            cell !== '@' &&
-            toString(keys.get(cell)) !== pHash && // stepping on a key is valid
-            !keysObtained.has(cell.toLowerCase()) && // stepping on A if 'a' is obtained is valid
-            !visited.has(pHash)
-        )
-            return false;
-        return true;
-    };
-
-    const helper = (start: IPoint, from: IPoint | null, visited: Set<string>, keysObtained: Set<string>): number => {
-        if (!isValid(start, visited, keysObtained))
-            return Infinity;
-
-        const cell = get(start);
-        let onKey = false;
-
-        visited.add(toString(start));
-        if (keys.has(cell) && !keysObtained.has(cell)) {
-            keysObtained.add(cell);
-            console.log('OBTAINED KEY: ', cell, '\n\tRemaining: ', Array.from(keys.keys()).filter(k => !keysObtained.has(k)));
-            onKey = true;
-            if (keysObtained.size === keys.size)
-                return 0;
-        }
-
-        // if currently stepping on key, you're allowed to go back
-        const neighbors = getNeighbors(start, onKey ? null : from);
-        const steps: number[] = [];
-        for (const neighbor of neighbors)
-            steps.push(helper(neighbor, start, onKey ? new Set() : visited, new Set(keysObtained)));
-
-        // console.log('backtracking at ', toKey(start));
-        return 1 + Math.min(...steps);
-    };
-
-    return helper(entrance, null, new Set(), new Set());
-};
-
-export const getNearestKeysMap = ({grid, keys, doors, entrance}: ITunnel) => {
-    const result = new Map<string, {toKey: string; steps: GenericSet<IPoint>}[]>();
-    const cache: {[toKey: string]: {[fromPoint: string]: IPoint[]}} = {}; // cache[toKey][fromPoint] = steps;
-    for (const k of keys.keys()) {
-        cache[k] = {};
-        result.set(k, []);
-    }
-    result.set('@', []); // need to add this for entrance
-
-    const get = ({row, col}: IPoint) => grid[row][col];
-    const isValid = (p: IPoint, visited: GenericSet<IPoint>) => {
-        const cell = get(p);
-        if (cell == null ||
-            visited.has(p) ||
-            cell !== '.' &&
-            cell !== '@' &&
-            !equals(keys.get(cell), p) && // stepping on a key is valid
-            !equals(doors.get(cell), p) // stepping on a door is valid. We don't care about doors right now
-        )
-            return false;
-        return true;
-    };
-    const helper = (start: IPoint, visited: GenericSet<IPoint>, toKey: string): IPoint[] | null => {
-        if (!isValid(start, visited))
-            return null;
-        // console.log('at', start, 'looking for', toKey);
-        const cell = get(start);
-        const pointStr = toString(start);
-        if (cache[toKey][pointStr] != null) {
-            // console.log('HIT CACHE! from:', start, 'to:', toKey, 'steps:', cache[toKey][pointStr]);
-            return cache[toKey][pointStr];
-        }
-        if (cell === toKey)
-            return [];
-
-        visited.add(start);
-        const neighbors = getNeighbors(start).filter(n => !visited.has(n));
-        const allSteps: IPoint[][] = [];
-        for (const neighbor of neighbors) {
-            const steps = helper(neighbor, visited, toKey);
-            if (steps != null)
-                allSteps.push(steps);
-        }
-
-        if (allSteps.length === 0)
-            return null;
-
-        const minSteps = allSteps.sort((a, b) => a.length - b.length)[0];
-        minSteps.unshift(start);
-        // cache[toKey][pointStr] = minSteps;
-        // console.log('put', cache[toKey][pointStr], 'into cache for toKey =', toKey, 'point =', pointStr);
-        return minSteps;
-    };
-
-    for (const k of keys.keys()) {
-        const steps = helper(entrance, new GenericSet<IPoint>(toString), k);
-        if (steps != null)
-            result.get('@')!.push({
-                toKey: k,
-                steps: new GenericSet(toString, steps)
-            });
-    }
-
-    for (const fromKey of keys.keys())
-        for (const toKey of keys.keys()) {
-            if (fromKey === toKey)
-                continue;
-            const steps = helper(keys.get(fromKey)!, new GenericSet<IPoint>(toString), toKey);
-            if (steps == null)
-                continue;
-            // if fromKey to toKey is 5 steps, then toKey to fromKey is 5 steps.
-            cache[toKey][toString(keys.get(fromKey))] = [...steps];
-            cache[fromKey][toString(keys.get(toKey))] = [...steps].reverse();
-            result.get(fromKey)!.push({
-                toKey,
-                steps: new GenericSet(toString, [...steps])
-            });
-        }
-    return result;
-};
-
-interface IPriorityQueueState {
-    point: IPoint;
-    distance: number;
-    keysObtained: GenericSet<string>;
-    doorsInWay: GenericSet<string>;
-}
 
 export const makeIsValid = ({grid, keys, doors}: IBaseTunnel) => (visited: GenericSet<IPoint>) => (p: IPoint) => {
     const cell = grid[p.row][p.col];
@@ -210,23 +91,27 @@ export const makeAddPointInfo = ({grid, keys, doors}: IBaseTunnel) => (p: IPoint
     };
 };
 
-// will return all short and long paths fromKey to toKey
+// will return all short AND LONG paths fromKey to toKey
 export const getDistancesToAllKeys = (from: IPoint, tunnel: IBaseTunnel) => {
     const queue = new PriorityQueue<IPriorityQueueState>(p => -1 * p.distance);
     const visited = new GenericSet<IPoint>(toString);
-    const result: {toKey: string; steps: number; doorsInWay: GenericSet<string>; keysInWay: GenericSet<string>}[] = [];
+    const result: IKeyToKeyInfo[] = [];
     const isValid = makeIsValid(tunnel)(visited);
     const addPointInfo = makeAddPointInfo(tunnel);
 
-    queue.enqueue({point: from, distance: 0, keysObtained: new GenericSet(s => s), doorsInWay: new GenericSet(s => s)});
     visited.add(from);
+    queue.enqueue({
+        point: from,
+        distance: 0,
+        keysObtained: new GenericSet(s => s),
+        doorsInWay: new GenericSet(s => s)
+    });
 
     while (!queue.isEmpty()) {
         const {point, distance, keysObtained, doorsInWay} = queue.dequeue()!;
         const neighbors = getNeighbors(point)
             .filter(isValid)
             .map(addPointInfo);
-
         for (let i = 0; i < neighbors.length; i++) {
             const neighbor = neighbors[i];
             const newKeysObtained = i === neighbors.length - 1 ? keysObtained : new GenericSet(keysObtained);
@@ -236,16 +121,17 @@ export const getDistancesToAllKeys = (from: IPoint, tunnel: IBaseTunnel) => {
             if (neighbor.key != null)
                 newKeysObtained.add(neighbor.key);
 
+            visited.add(neighbor.point);
             queue.enqueue({
                 point: neighbor.point,
                 distance: distance + 1,
                 keysObtained: newKeysObtained,
                 doorsInWay: newDoorsInWay
             });
-            visited.add(neighbor.point);
+
             if (neighbor.key != null) {
                 const keysInWay = new GenericSet(keysObtained);
-                keysInWay.delete(neighbor.key);
+                keysInWay.delete(neighbor.key); // don't include toKey in keysInWay
                 result.push({
                     toKey: neighbor.key,
                     steps: distance + 1,
@@ -258,19 +144,12 @@ export const getDistancesToAllKeys = (from: IPoint, tunnel: IBaseTunnel) => {
     return result;
 };
 
-export const getNearestKeysMap2 = (tunnel: ITunnel) => {
+export const getNearestKeysMap = (tunnel: ITunnel) => {
     const { keys, entrance } = tunnel;
     return new Map(Array.from(keys.entries())
         .map(([k, p]) => [k, getDistancesToAllKeys(p, tunnel)])
     ).set('@', getDistancesToAllKeys(entrance, tunnel));
 };
-
-export interface IKeyToKeyInfo {
-    toKey: string;
-    steps: number;
-    doorsInWay: GenericSet<string>;
-    keysInWay: GenericSet<string>;
-}
 
 export const makeGetReachableKeys =
     (keyToKeyMap: Map<string, IKeyToKeyInfo[]>) =>
@@ -279,24 +158,23 @@ export const makeGetReachableKeys =
             ?.filter(k => !keysObtained.has(k.toKey))
             ?.filter(k => k.doorsInWay.subsetOf(keysObtained, k => k.toString().toLowerCase()))
             ?.filter(k => k.keysInWay.subsetOf(keysObtained)) ?? [];
-            // if you skip over keysInWay, you'e looking at a suboptiaml route
+            // if you skip over keysInWay, you'e looking at a suboptiaml route because you'll examine routes
+            // like a -> c, when there is key b between a -> c
+
+export const getCacheKey = (fromKey: string, keysObtained: string) =>
+    `${fromKey},${[...keysObtained].sort().toString()}`;
 
 export const solve = (keyToKeyMap: Map<string, IKeyToKeyInfo[]>) => {
     const getReachableKeys = makeGetReachableKeys(keyToKeyMap);
-    const getCacheKey = (fromKey: string, keysObtained: string) => `${fromKey},${[...keysObtained].sort().toString()}`;
     const cache: {[key: string]: number} = {};
 
-    let count = 0;
     const helper = (fromKey: string, keysObtained: string): number => {
         if (keysObtained.length === keyToKeyMap.size - 1) {
-            // console.log('count', count);
             return 0;
         } // minus 1 because @ is in keysToKeysSteps
         const cacheKey = getCacheKey(fromKey, keysObtained);
         if (cache[cacheKey] != null)
             return cache[cacheKey];
-        count++;
-        console.log('atKey:', fromKey, 'keysObtained', keysObtained);
         // has to be uppercased so it can be compared against doors
         const reachableKeys = getReachableKeys(fromKey, new GenericSet(k => k, [...keysObtained]));
         let totalSteps = Infinity;
@@ -310,16 +188,12 @@ export const solve = (keyToKeyMap: Map<string, IKeyToKeyInfo[]>) => {
         return totalSteps;
     };
 
-    const x = helper('@', '');
-    console.log('count', count);
-    return x;
+    return helper('@', '');
 };
-
-export const getCacheKey = (fromKey: string, keysObtained: string) =>
-    `${fromKey},${[...keysObtained].sort().toString()}`;
 
 export const solve2 = (keytoKeyMap: Map<string, IKeyToKeyInfo[]>) => {
     type QueueState = {totalSteps: number; keysObtained: string; atKey: string};
+    // const queue = new Queue<QueueState>(); FOR BFS
     const queue = new PriorityQueue<QueueState>(p => -1 * p.totalSteps);
     const visited = new Map<string, number>();
     const getReachableKeys = makeGetReachableKeys(keytoKeyMap);
@@ -330,6 +204,7 @@ export const solve2 = (keytoKeyMap: Map<string, IKeyToKeyInfo[]>) => {
         const { totalSteps, keysObtained, atKey } = queue.dequeue()!;
         if (keysObtained.length === keytoKeyMap.size - 1) {
             minSteps = Math.min(totalSteps, minSteps);
+            return minSteps; // for BFS, remove this line.
         }
 
         const reachableKeys = getReachableKeys(atKey, new GenericSet(k => k, [...keysObtained]));
@@ -337,6 +212,8 @@ export const solve2 = (keytoKeyMap: Map<string, IKeyToKeyInfo[]>) => {
             const newKeysObtained = keysObtained + key.toKey;
             const newCacheKey = getCacheKey(key.toKey, newKeysObtained);
             const newTotalSteps = totalSteps + key.steps;
+            // the visited.get(newCacheKey)! > newTotalSteps is crucial, because you may find a later route that has
+            // fewer steps
             if (!visited.has(newCacheKey) || visited.get(newCacheKey)! > newTotalSteps) {
                 queue.enqueue({
                     totalSteps: newTotalSteps,
@@ -352,27 +229,13 @@ export const solve2 = (keytoKeyMap: Map<string, IKeyToKeyInfo[]>) => {
 
 export const run = () => {
     console.log('STARTING');
-    const sims = getSimulations();
+    const sims = getSimulations().slice(1, 2);
     for (const s of sims) {
-        const d = getNearestKeysMap2(s);
-
+        const d = getNearestKeysMap(s);
         console.log(timer.start(`18 - ${s.name}, ${s.keys.size} keys, ${s.doors.size} doors`));
-        // console.log(s.grid.map(r => r.join(' ')).join('\n'));
-        // const keysToKeys = getNearestKeysMap(s);
-        // const simpleKeysToKeys = new Map(
-        //     Array.from(keysToKeys.entries())
-        //     .map(([k, s]) => [
-        //         k,
-        //         s.map(v => ({toKey: v.toKey, steps: v.steps.size}))
-        //     ]));
-        // console.log(simpleKeysToKeys.get('@')?.sort((a, b) => a.steps - b.steps).map(a => `${a.toKey}: ${a.steps}`).join('   '));
-        // console.log(solve(simpleKeysToKeys, getDoorsNeededUnlockedMap(keysToKeys, s.doors)));
-        // Array.from(d.keys()).forEach(k =>
-        //     console.log(`key=${k}\t`, d.get(k)?.map(a => `${a.toKey}: ${a.steps} (${Array.from(a.keysInWay.values()).concat(Array.from(a.doorsInWay.values()))})`).join('   '))
-        // );
-        // console.log(d.get('@')?.map(a => `${a.toKey}: ${a.steps} (${Array.from(a.keysInWay.values())})`).join('   '));
-        console.log('answer =', solve2(d));
-        // console.log(solve2(d));
+        console.log(s.grid.map(r => r.join(' ')).join('\n'));
+        console.log('answer (DIJ) =', solve2(d));
+        console.log('answer (DFS) =', solve(d));
         console.log(timer.stop());
     }
 };
