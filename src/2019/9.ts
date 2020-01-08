@@ -43,16 +43,16 @@ export class IntcodeComputer {
         const { opcode: code, modes } = IntcodeComputer.getModes(this.program[this.nextIndex]);
         switch(code) {
             case '01': { // add
-                const op1 = this.program[this.getIndex(this.nextIndex + 1, modes[0])];
-                const op2 = this.program[this.getIndex(this.nextIndex + 2, modes[1])];
+                const op1 = this.program[this.getIndex(this.nextIndex + 1, modes[0])] ?? 0;
+                const op2 = this.program[this.getIndex(this.nextIndex + 2, modes[1])] ?? 0;
                 this.program[this.getIndex(this.nextIndex + 3, modes[2])] = op1 + op2;
                 this.nextIndex += size[code] + 1;
 
                 return { halt: false, output: NaN };
             }
             case '02': { // multiply
-                const op1 = this.program[this.getIndex(this.nextIndex + 1, modes[0])];
-                const op2 = this.program[this.getIndex(this.nextIndex + 2, modes[1])];
+                const op1 = this.program[this.getIndex(this.nextIndex + 1, modes[0])] ?? 0;
+                const op2 = this.program[this.getIndex(this.nextIndex + 2, modes[1])] ?? 0;
                 this.program[this.getIndex(this.nextIndex + 3, modes[2])] = op1 * op2;
                 this.nextIndex += size[code] + 1;
 
@@ -70,33 +70,33 @@ export class IntcodeComputer {
                 return { halt: false, output };
             }
             case '05': { // jump if not equal to 0
-                const op1 = this.program[this.getIndex(this.nextIndex + 1, modes[0])];
-                const op2 = this.program[this.getIndex(this.nextIndex + 2, modes[1])];
+                const op1 = this.program[this.getIndex(this.nextIndex + 1, modes[0])] ?? 0;
+                const op2 = this.program[this.getIndex(this.nextIndex + 2, modes[1])] ?? 0;
                 this.nextIndex = op1 !== 0 ? op2 : size[code] + this.nextIndex + 1;
                 return { halt: false, output: NaN };
             }
             case '06': { // jump if equal to 0
-                const op1 = this.program[this.getIndex(this.nextIndex + 1, modes[0])];
-                const op2 = this.program[this.getIndex(this.nextIndex + 2, modes[1])];
+                const op1 = this.program[this.getIndex(this.nextIndex + 1, modes[0])] ?? 0;
+                const op2 = this.program[this.getIndex(this.nextIndex + 2, modes[1])] ?? 0;
                 this.nextIndex = op1 === 0 ? op2 : size[code] + this.nextIndex + 1;
                 return { halt: false, output: NaN };
             }
             case '07': { // if less than, set to 1
-                const op1 = this.program[this.getIndex(this.nextIndex + 1, modes[0])];
-                const op2 = this.program[this.getIndex(this.nextIndex + 2, modes[1])];
+                const op1 = this.program[this.getIndex(this.nextIndex + 1, modes[0])] ?? 0;
+                const op2 = this.program[this.getIndex(this.nextIndex + 2, modes[1])] ?? 0;
                 this.program[this.getIndex(this.nextIndex + 3, modes[2])] = op1 < op2 ? 1 : 0;
                 this.nextIndex += size[code] + 1;
                 return { halt: false, output: NaN };
             }
             case '08': { // if equal, set to 1
-                const op1 = this.program[this.getIndex(this.nextIndex + 1, modes[0])];
-                const op2 = this.program[this.getIndex(this.nextIndex + 2, modes[1])];
+                const op1 = this.program[this.getIndex(this.nextIndex + 1, modes[0])] ?? 0;
+                const op2 = this.program[this.getIndex(this.nextIndex + 2, modes[1])] ?? 0;
                 this.program[this.getIndex(this.nextIndex + 3, modes[2])] = op1 === op2 ? 1 : 0;
                 this.nextIndex += size[code] + 1;
                 return { halt: false, output: NaN };
             }
             case '09': { // change relative mode offset
-                const op1 = this.program[this.getIndex(this.nextIndex + 1, modes[0])];
+                const op1 = this.program[this.getIndex(this.nextIndex + 1, modes[0])] ?? 0;
                 this.relativeBaseOffset += op1;
                 this.nextIndex += size[code] + 1;
                 return { halt: false, output: NaN };
@@ -151,8 +151,8 @@ export class IntcodeComputer {
         if (mode === 'immediate')
             return i;
         if (mode === 'position')
-            return this.program[i];
-        const index = this.program[i] + this.relativeBaseOffset;
+            return this.program[i] ?? 0;
+        const index = (this.program[i] ?? 0) + this.relativeBaseOffset;
         return index;
     }
 
