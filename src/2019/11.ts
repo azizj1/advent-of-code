@@ -10,14 +10,14 @@ export interface IPoint {
     row: number;
 }
 
-const dy = {
+export const dy = {
     'up': -1,
     'down': 1,
     'right': 0,
     'left': 0
 };
 
-const dx = {
+export const dx = {
     'up': 0,
     'down': 0,
     'right': 1,
@@ -108,5 +108,3 @@ export const ans = () => {
     console.log(robot.toString());
     return robot.numOfPanelsPaintedWhite;
 };
-
-console.log(ans());
