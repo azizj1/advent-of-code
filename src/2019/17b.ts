@@ -5,6 +5,7 @@ import sampleInput from './17.txt';
 import { timer } from '~/util/Timer';
 import { IntcodeComputer } from '~/2019/9';
 import * as input from './17.json';
+import { toString } from '~/2019/17';
 
 type RelativeDirection = '' | 'right' | 'left';
 
@@ -92,6 +93,17 @@ const traverse = ({grid, start}: IScaffold) => {
     return paths.map(([, r, d]) => [r.slice(0, 1).toUpperCase(), d].filter(r => r !== '').join(',')).join(',');
 };
 
+export const toGrid = (compOutput: string[]) => {
+    const grid: string[][] = [[]];
+    for (let i = 0; i < compOutput.length; i++) {
+        if (compOutput[i] === '\n')
+            grid.push([]);
+        else
+            last(grid).push(compOutput[i]);
+    }
+    return grid;
+};
+
 // ====== DON'T FORGET!!! =======
 // Force the vacuum robot to wake up by changing the value in your ASCII program at address 0 from 1 to 2. When you do
 // this, you will be automatically prompted for the new movement rules that the vacuum robot should use. The ASCII
@@ -106,18 +118,24 @@ export const run = () => {
         console.log(traverse(s));
         console.log(timer.stop());
     }
-
+    // it's only returning the answer when you run it in continuous-video mode (i.e., y\n instead of n\n at the end)
+    console.log(timer.start('17b - run game'));
     const comp = new IntcodeComputer(input.data);
     comp.updateProgram(0, 2);
     const ans = 'A,A,B,B,C,B,C,B,C,A\nL,10,L,10,R,6\nR,12,L,12,L,12\nL,6,L,10,R,12,R,12\nn\n';
     const asciiCode = ans.split('').map(s => s.charCodeAt(0));
     console.log(asciiCode);
+
+    const output: number[] = [];
     comp.setInput(...asciiCode);
-    const output: string[] = [];
+    let lastOutput = 0;
     while (comp.hasMore()) {
-        output.push(String.fromCharCode(comp.run()));
+        lastOutput = comp.run();
+        output.push(lastOutput);
     }
-    console.log(output);
+    console.log(toString(toGrid(output.map(a => String.fromCharCode(a)))));
+    console.log(lastOutput);
+    console.log(timer.stop());
 };
 
 /*
