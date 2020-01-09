@@ -2,7 +2,7 @@
 async function run() {
     try {
         // const p1 = await import(/* webpackChunkName: "problem1" */ './2019/18');
-        const p2 = await import(/* webpackChunkName: "problem1" */ './2019/17b');
+        const p2 = await import(/* webpackChunkName: "problem1" */ './2019/19');
         // p1.run();
         p2.run();
     } catch (e) {

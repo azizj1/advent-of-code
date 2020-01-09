@@ -21,6 +21,7 @@ const size = {
 
 export class IntcodeComputer {
     private program: number[];
+    private originalProgam: number[];
     private nextIndex: number;
 
     private inputs: number[];
@@ -32,6 +33,7 @@ export class IntcodeComputer {
 
     constructor(program: number[], ...inputs: number[]) {
         this.program = [...program];
+        this.originalProgam = [...program];
         this.nextIndex = 0;
         this.inputs = inputs;
         this.inputIndex = 0;
@@ -128,6 +130,15 @@ export class IntcodeComputer {
                 return output;
         }
         return NaN;
+    }
+
+    reset() {
+        this.program = [...this.originalProgam];
+        this.nextIndex = 0;
+        this.inputs = [];
+        this.inputIndex = 0;
+        this.relativeBaseOffset = 0;
+        this.lastOutput = 0;
     }
 
     get output() {
