@@ -93,44 +93,6 @@ const traverse = ({grid, start}: IScaffold) => {
     return paths.map(([, r, d]) => [r.slice(0, 1).toUpperCase(), d].filter(r => r !== '').join(',')).join(',');
 };
 
-/*
-[
-    L,10
-    L,10
-    R,6
-    L,10
-    L,10
-    R,6
-    R,12
-    L,12
-    L,12
-    R,12
-    L,12
-    L,12
-    L,6
-    L,10
-    R,12
-    R,12
-    R,12
-    L,12
-    L,12
-    L,6
-    L,10
-    R,12
-    R,12
-    R,12
-    L,12
-    L,12
-    L,6
-    L,10
-    R,12
-    R,12
-    L,10
-    L,10
-    R,6
-]
-*/
-
 export const toGrid = (compOutput: string[]) => {
     const grid: string[][] = [[]];
     for (let i = 0; i < compOutput.length; i++) {

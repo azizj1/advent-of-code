@@ -37,7 +37,7 @@ const getCameraOutput = (comp: IntcodeComputer) => {
     return output.slice(0, -2);
 };
 
-export const toString = (grid: string[][]) => grid.map(r => r.join(' ')).join('\n');
+export const toString = (grid: string[][], delim = ' ') => grid.map(r => r.join(delim)).join('\n');
 
 const prodSumInteractions = (interactions: [number, number][]) => interactions.reduce((a, [r, c]) => a + r * c, 0);
 
