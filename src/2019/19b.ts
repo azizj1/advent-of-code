@@ -1,8 +1,9 @@
 import { IntcodeComputer } from '~/2019/9';
 import * as input from './19.json';
-import { last } from '~/util/util';
+import { last, dropConsoleInfo, resetConsoleInfo } from '~/util/util';
 import { timer } from '~/util/Timer';
 import { toString } from '~/2019/17';
+import { getPointsAffectedFromGrid } from '~/2019/19';
 
 export const getGrid = (comp: IntcodeComputer, height: number) => {
     const grid: string[][] = [];
@@ -25,6 +26,19 @@ export const getGrid = (comp: IntcodeComputer, height: number) => {
         }
         j--;
         grid[i][j] = '.';
+    }
+    return grid;
+};
+
+export const getGrid2 = (comp: IntcodeComputer, height: number) => {
+    const grid: string[][] = [];
+    for (let i = 0; i < height; i++) {
+        grid[i] = [];
+        for (let j = 0; j < 50; j++) {
+            const output = comp.run(i, j);
+            comp.reset();
+            grid[i][j] = output === 1 ? '#' : '.';
+        }
     }
     return grid;
 };
@@ -104,14 +118,15 @@ const getPattern = (seq: [number, number][]) => {
 };
 
 export const test = () => {
-    const height = 33;
+    const height = 50;
     console.log(input.data.length);
     const comp = new IntcodeComputer(input.data);
     console.log(timer.start());
     const expected = getOnesPerRow(comp, height);
     console.log(timer.stop());
     const actual = getOnesPerRowWithEquation(height);
-    console.log(toString(getGrid(comp, height), ''));
+    const grid = getGrid(comp, height);
+    console.log(toString(grid, ''));
     console.log(expected.map(([s, e], i) => `i: ${i}\tstart: ${s}\tend: ${e}  \tsize=${e - s + 1}`).join('\n'));
     console.log('\n===EQUATION TIME====\n');
     console.log(actual.map(([s, e], i) => `i: ${i}\tstart: ${s}\tend: ${e}  \tsize=${e - s + 1}`).join('\n'));
@@ -119,6 +134,9 @@ export const test = () => {
     console.log('\n=====PATTERN (EXPECTED   ACTUAL)====\n');
     const actualPattern = getPattern(actual);
     console.log(getPattern(expected).map((e, i) => `${e}\t${actualPattern[i]}`).join('\n'));
+
+    console.log('points grid1', getPointsAffectedFromGrid(grid));
+    console.log('points grid2', getPointsAffectedFromGrid(getGrid2(comp, 50)));
 };
 
 export const whenOverlap = (side: number) => {
@@ -132,10 +150,10 @@ export const whenOverlap = (side: number) => {
     }
 
     while (end - getStartIndex(i + side - 1) !== side - 1) {
+        console.info('start', start, 'end', end, 'i', i, 'overlap', end - getStartIndex(i + side - 1));
         i++;
         start = getStartIndex(i);
         end = getEndIndex(i);
-        console.log('start', start, 'end', end, 'i', i, 'overlap', end - getStartIndex(i + side - 1));
     }
     return {
         start,
@@ -163,10 +181,10 @@ export const whenOverlapUsingComp = (comp: IntcodeComputer, side: number) => {
     }
 
     while (end - getStartIndex(i + side - 1) !== side - 1) {
+        console.info('start', start, 'end', end, 'i', i, 'overlap', end - getStartIndex(i + side - 1));
         i++;
         start = getStartIndex(i);
         end = getEndIndex(i);
-        console.log('start', start, 'end', end, 'i', i, 'overlap', end - getStartIndex(i + side - 1));
     }
     return {
         start,
@@ -181,11 +199,16 @@ export const whenOverlapUsingComp = (comp: IntcodeComputer, side: number) => {
 };
 
 export const run = () => {
+    dropConsoleInfo();
     console.log(timer.start('whenOverlap'));
-    // const comp = new IntcodeComputer(input.data);
+    const comp = new IntcodeComputer(input.data);
     console.log(whenOverlap(100));
-    console.log(getEndIndex(622));
-    console.log(getStartIndex(722));
+    console.log('NOW COMP');
+    console.log(whenOverlapUsingComp(comp, 100));
+    console.log(getEndIndex(619));
+    console.log(getStartIndex(720));
+    console.log(`answer = ${619 * 10000 + 1165}`);
     console.log(timer.stop());
     // console.log(toString(getGrid(comp, 800), ''));
+    resetConsoleInfo();
 };
