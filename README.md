@@ -10,4 +10,5 @@ Worth taking notes on:
     * Dijkstra's algorithm
 * [Day 18b - Multiple Robots Unlocking Keys and Doors](src/2019/18b.md)
     * Combinations with Dijkstra.
-
+* Day 20a
+* Day 20b
