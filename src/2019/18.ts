@@ -64,7 +64,7 @@ export const equals = (p1?: IPoint, p2?: IPoint) => p1 != null && p2 != null ?
     p1.col === p2.col && p1.row === p2.row :
     false;
 
-const getNeighbors = ({row, col}: IPoint, exclude?: IPoint | null): IPoint[] =>
+export const getNeighbors = ({row, col}: IPoint, exclude?: IPoint | null): IPoint[] =>
     exclude == null ?
         [{row: row - 1, col}, {row: row + 1, col}, {row, col: col + 1}, {row, col: col - 1}] :
         getNeighbors({row, col}, null).filter(p => p.row !== exclude.row || p.col !== exclude.col);
