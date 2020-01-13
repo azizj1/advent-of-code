@@ -12,3 +12,5 @@ Worth taking notes on:
     * Combinations with Dijkstra.
 * Day 20a
 * Day 20b
+* Day 22b - Solving congruent equations, modular exponentiation, Fermats's Little Theorem, extended GCD and extended Euclidian algorithm, and modular inverse
+    * https://www.youtube.com/watch?v=kXL9UKujxJo

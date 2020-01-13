@@ -126,5 +126,3 @@ export const run = () => {
         console.log(timer.stop());
     }
 };
-
-// run();

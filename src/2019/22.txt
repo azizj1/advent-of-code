@@ -1,19 +1,19 @@
-[1,10]
+[1,10,0,1,2,3,4,5,6,7,8,9]
 deal with increment 7
 deal into new stack
 deal into new stack
 
-[2,10]
+[2,10,0,1,2,3,4,5,6,7,8,9]
 cut 6
 deal with increment 7
 deal into new stack
 
-[3,10]
+[3,10,0,1,2,3,4,5,6,7,8,9]
 deal with increment 7
 deal with increment 9
 cut -2
 
-[4,10]
+[4,10,0,1,2,3,4,5,6,7,8,9]
 deal into new stack
 cut -2
 deal with increment 7
@@ -25,7 +25,7 @@ deal with increment 9
 deal with increment 3
 cut -1
 
-[input,10007]
+[input,10007,2019]
 cut -4258
 deal with increment 71
 cut -6593

@@ -1,6 +1,7 @@
 import input from './22.txt';
 import { getRunsFromIniFile, first } from '~/util/util';
 import { timer } from '~/util/Timer';
+import chalk from 'chalk';
 
 export const set = (arr: number[], index: number, value: number) => {
     arr[index] = value;
@@ -32,12 +33,11 @@ export const getSimulations = () => getRunsFromIniFile(input).map(ini => ({
 export const run = () => {
     const sims = getSimulations();
     for (const s of sims) {
-        console.log(timer.start(`22 - ${s.name} (size ${s.size} techniques ${s.techniques.length})`));
+        console.log(timer.start(`22 - ${s.name} (size ${chalk.red(s.size + '')} techniques ${chalk.red(s.techniques.length + '')})`));
         const shuffled = s.techniques.reduce((a, c) => c(a), getDeck(s.size));
         if (s.name === 'input')
             console.log(shuffled.indexOf(2019));
-        else
-            console.log(shuffled);
+        console.log(shuffled);
         console.log(timer.stop());
     }
 };
