@@ -145,15 +145,30 @@ export const getSimulations = () => getRunsFromIniFile(input).map(ini => {
     };
 });
 
+export const applyTechniques = (techniques: ((i: number) => number)[]) => (indexOfInterest: number) => {
+    let val = indexOfInterest;
+    for (let i = 0; i < techniques.length; i++) {
+        let temp = val;
+        for (let j = 0; j < i; j++) {
+            // console.log(`\ttemp = ${temp} BEFORE applying technique ${j}`);
+            temp = techniques[j](temp);
+            // console.log(`\ttemp = ${temp} AFTER applying technique ${j}`);
+        }
+        val = techniques[i](temp);
+        // console.log(`val = ${val} after applying technique ${i}`);
+    }
+    return val;
+};
+
 export const run = () => {
     console.log(timer.start('prime test'));
     console.log(`is ${newDeckSize} prime? ${isPrime(newDeckSize)}`);
     console.log(timer.stop());
 
-    const sims = getSimulations();
+    const sims = getSimulations().slice(1, 2);
     for (const s of sims) {
         console.log(timer.start(`22b - ${s.name} (size ${chalk.red(s.size + '')} techniques ${chalk.red(s.techniques.length + '')} index ${chalk.red(s.indicesOfInterest + '')})`));
-        const finalIndex = s.indicesOfInterest.map(i => s.techniques.reduce((a, c) => c(a), i));
+        const finalIndex = s.indicesOfInterest.map(applyTechniques(s.techniques));
         console.log(finalIndex);
         console.log(timer.stop());
     }

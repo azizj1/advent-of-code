@@ -31,7 +31,7 @@ export const getSimulations = () => getRunsFromIniFile(input).map(ini => ({
 }));
 
 export const run = () => {
-    const sims = getSimulations();
+    const sims = getSimulations().slice(1, 2);
     for (const s of sims) {
         console.log(timer.start(`22 - ${s.name} (size ${chalk.red(s.size + '')} techniques ${chalk.red(s.techniques.length + '')})`));
         const shuffled = s.techniques.reduce((a, c) => c(a), getDeck(s.size));
