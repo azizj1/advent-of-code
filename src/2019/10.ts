@@ -19,6 +19,10 @@ export const fromKey = (key: string) => {
 };
 
 export const getgcd = (a: number, b: number): number => {
+    if (a === 0)
+        return b;
+    if (b === 0)
+        return a;
     const numerator = Math.max(a, b);
     const denominator = Math.min(a, b);
     const remainder = numerator % denominator;

@@ -27,7 +27,6 @@ export const modExp = (base: number, power: number, mod: number): number => {
         return 1;
     if (power === 1)
         return base % mod;
-
     let result = modExp(base, power >> 1, mod); // power = Math.floor(power / 2)
     result = (result * result) % mod;
 
@@ -104,7 +103,7 @@ export const gcdExtended = (a: number, b: number) => {
 };
 
 export const modInverse = (base: number, mod: number) => {
-    if (getgcd(base, mod) !== 1)
+    if (getgcd(base, mod) !== 1 && base !== 0)
         // eslint-disable-next-line max-len
         throw new Error(`There is no SINGLE mod inverse for ${base} % ${mod} because ${base} and ${mod} are not co-prime (relatively prime)`);
     const { x } = gcdExtended(base, mod);
@@ -115,60 +114,104 @@ export const modInverse = (base: number, mod: number) => {
 // returns x which satisfies ax = b (mod m)
 // returns x which satsifies ax % m = b
 export const solveLinCongruence = (a: number, b: number, mod: number) => {
+    // console.log('a', a, 'b', b, 'mod', mod);
     const inverse = modInverse(a, mod);
+    // console.log(`\tans = ${(b * inverse) % mod}`);
     return (b * inverse) % mod;
 };
 
-export const newStack = (size: number) => (i: number) => size - i - 1;
-export const cut = (size: number) => (n: number) => (i: number) => (i + n + size) % size;
-export const increment = (size: number) => (n: number) => (i: number) => solveLinCongruence(n, i, size);
+// goes from y = mx + b -> y = -mx + y(-1) = -mx + (-m + b) = [b - m, -m]
+export const newStack = (constant: number, slope: number, mod: number): [number, number] =>
+    [(constant - slope) % mod, -1 * slope];
 
-const toTechnique = (size: number) => (s: string) => {
+// slope doesn't change, but y = mx + b  ->  y = mx + y(n) = mx + mn + b = [mn + b, m]
+export const cut = (n: number) => (constant: number, slope: number, mod: number): [number, number] =>
+    [(constant + n * slope) % mod, slope];
+
+// whatever the increment in, say inc = 3, you need to first figure out the form of y = mx + b. E.g.,
+// if 0 1 2 3 4 5 6 7 8 9, and inc = 3, then the set becomes
+//    0 7 4 1 8 5 2 9 6 3
+// if you notice, slope = 7. That's because we know that if a number it at index i, it'll get moved to
+// i * inc % size = newPosition  -->  3i % 10 = newPosition
+// So for i = 0 -> new = 0, i = 1 -> new = 3, i = 2 -> new = 6, i = 3 -> 9, i = 4 -> 2, etc.
+// We want to know the CHANGE, the slope, and to do that, we need to solve what the old index was to get newPosition = 1
+// I.e., 3i % 10 = 1. What's i to get newPosition = 1?
+// We can split this up modularly, 3i ≡ 1  (mod 10). We can just figure out the modular inverse to do this!
+// solveLinCongruence() actually solves 3i = b  (mod 10), so we pass b = 1 to it.
+// we get that slope = 7, as expected, and our equation now becomes -> y = 7x + b
+// if we had a slope from before, say it was 7 (so an inc of 3) from before, i.e.,
+//   0 7 4 1 8 5 2 9 6 3
+//   ^ we increment that by 3 again to get
+//   0 9 8 7 6 5 4 3 2 1
+// the slope is now 9. We can get that by getting the modInverse of 3 again, which is 7 and then doing
+// prevSlope * 7 % 10 = 49 % 10 = 9
+export const increment = (n: number) => (constant: number, slope: number, mod: number): [number, number] =>
+    [constant, (slope * solveLinCongruence(n, 1, mod)) % mod];
+
+const toTechnique = (s: string) => {
     if (s.indexOf('stack') >= 0)
-        return newStack(size);
+        return newStack;
     if (s.indexOf('increment') >= 0)
-        return increment(size)(Number(first(s.match(/-?\d+/g) ?? [])));
+        return increment(Number(first(s.match(/-?\d+/g) ?? [])));
     if (s.indexOf('cut') >= 0)
-        return cut(size)(Number(first(s.match(/-?\d+/g) ?? [])));
+        return cut(Number(first(s.match(/-?\d+/g) ?? [])));
     throw new Error('Technique not found');
 };
 
 export const getSimulations = () => getRunsFromIniFile(input).map(ini => {
     const header = ini.name.split(',');
     const size = Number(header[1]);
-    const indicesOfInterest = header.slice(2).map(Number);
+    const times = Number(header[2]);
+    const indicesOfInterest = header.slice(3).map(Number);
     return {
         name: header[0],
         size,
+        times,
         indicesOfInterest,
-        techniques: ini.content.split('\n').filter(s => s.trim() !== '').map(toTechnique(size))
+        techniques: ini.content.split('\n').filter(s => s.trim() !== '').map(toTechnique)
     };
 });
 
-export const applyTechniques = (techniques: ((i: number) => number)[]) => (indexOfInterest: number) => {
-    let val = indexOfInterest;
+export const applyTechniques =
+    (techniques: ((constant: number, slope: number, mod: number) => [number, number])[], size: number) =>
+    (initConstant = 0, initSlope = 1) =>
+{
+    let constant = initConstant;
+    let slope = initSlope;
     for (let i = 0; i < techniques.length; i++) {
-        let temp = val;
-        for (let j = 0; j < i; j++) {
-            // console.log(`\ttemp = ${temp} BEFORE applying technique ${j}`);
-            temp = techniques[j](temp);
-            // console.log(`\ttemp = ${temp} AFTER applying technique ${j}`);
-        }
-        val = techniques[i](temp);
-        // console.log(`val = ${val} after applying technique ${i}`);
+        [constant, slope] = techniques[i](constant, slope, size);
+        // console.log('constant', constant, 'slope', slope);
     }
-    return val;
+    // console.log('start', start, 'indexOfInterest', indexOfInterest, 'size', size, '(start - indexOfInterest - 1)', (start - indexOfInterest - 1), '% size', (start - indexOfInterest - 1) % size, 'eq', Math.abs((start - indexOfInterest - 1) % size));
+    return { slope, constant };
+    // const inRange = (constant + indexOfInterest * slope) % size;
+    // return (size + inRange) % size;
+};
+
+export const repeatApplication =
+    (size: number) =>
+    (constant: number, slope: number, times: number) =>
+    (indexOfInterest: number) =>
+{
+    const newSlope = modExp(Math.abs(slope), times, size) * (times % 2 === 0 ? 1 : -1);
+    console.log('newSlope', newSlope);
+    const newConstant = solveLinCongruence(1, constant * (1 - newSlope) / (1 - slope), size);
+
+    const inRange = (newConstant + indexOfInterest * newSlope) % size;
+    return (size + inRange) % size;
 };
 
 export const run = () => {
     console.log(timer.start('prime test'));
     console.log(`is ${newDeckSize} prime? ${isPrime(newDeckSize)}`);
     console.log(timer.stop());
-
-    const sims = getSimulations().slice(1, 2);
+    console.log(modExp(-40, 97, 49));
+    const sims = getSimulations();
     for (const s of sims) {
-        console.log(timer.start(`22b - ${s.name} (size ${chalk.red(s.size + '')} techniques ${chalk.red(s.techniques.length + '')} index ${chalk.red(s.indicesOfInterest + '')})`));
-        const finalIndex = s.indicesOfInterest.map(applyTechniques(s.techniques));
+        console.log(timer.start(`22b - ${s.name} (size ${chalk.red(s.size + '')} techniques ${chalk.red(s.techniques.length + '')} times ${chalk.red(s.times + '')} index ${chalk.red(s.indicesOfInterest + '')})`));
+        const { constant, slope } = applyTechniques(s.techniques, s.size)();
+        console.log(applyTechniques(s.techniques, s.size)());
+        const finalIndex = s.indicesOfInterest.map(repeatApplication(s.size)(constant, slope, s.times));
         console.log(finalIndex);
         console.log(timer.stop());
     }
