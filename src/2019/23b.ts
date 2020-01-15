@@ -1,54 +1,28 @@
 import { IntcodeComputer } from '~/2019/9';
 import { getProgram } from '~/2019/21';
 import input from './23.txt';
-import { Queue } from '~/util/Queue';
 import { timer } from '~/util/Timer';
+import { IPacket, Computer } from '~/2019/23';
 import chalk from 'chalk';
 
-export interface IPacket {
-    to: number;
-    x: number;
-    y: number;
-}
+class NATComputer {
+    private lastPacket: IPacket | null;
+    private id = 255;
 
-export class Computer {
-    private id: number;
-    private intcode: IntcodeComputer;
-    private queue: Queue<IPacket>;
-
-    constructor(id: number, intcode: IntcodeComputer) {
-        this.id = id;
-        this.intcode = intcode;
-        this.queue = new Queue();
+    constructor() {
+        this.lastPacket = null;
     }
 
     process() {
-        const msgs: IPacket[] = [];
-        if (this.queue.isEmpty())
-            this.intcode.pushInputs(-1);
-        else {
-            const { x, y } = this.queue.dequeue()!;
-            this.intcode.pushInputs(x, y);
-            console.info(`${this.identifier}: ingested msg x=${x},y=${y}`);
-        }
-
-        const to = this.intcode.run();
-        const x = this.intcode.run();
-        const y = this.intcode.run();
-
-        if (!isNaN(to) && !isNaN(x) && !isNaN(y)) {
-            msgs.push({to, x, y});
-            console.info(`${this.identifier}: send msg to ${chalk.blue(to + '')}. Msg: x=${x},y=${y}`);
-        }
-        return msgs;
+        if (this.lastPacket == null)
+            return [];
+        const { x, y } = this.lastPacket;
+        console.info(`${this.identifier}: send msg to 0. Msg: x=${x},y=${y}`);
+        return [{to: 0, x, y}];
     }
 
     receive(packet: IPacket) {
-        this.queue.enqueue(packet);
-    }
-
-    hasPacketsToProcess() {
-        return !this.queue.isEmpty();
+        this.lastPacket = packet;
     }
 
     private get identifier() {
@@ -58,23 +32,27 @@ export class Computer {
 
 class Network {
     private computers: Computer[];
+    private nat: NATComputer;
 
     constructor(size: number) {
         this.computers = Array.from({length: size}, (_, i) => i)
             .map(id => new IntcodeComputer(getProgram(input), id))
             .map((intcode, id) => new Computer(id, intcode));
+        this.nat = new NATComputer();
     }
 
-    reboot() {
+    runUntilIdle() {
         let i = 0,
-            numOfCompWithNoOutput = 0;
+            numOfCompWithNoOutput = 0,
+            numOfCompWithNoInput = 0,
+            totalMsgsSent = 0;
 
-        while (numOfCompWithNoOutput < 50) {
+        while (numOfCompWithNoOutput < 50 || numOfCompWithNoInput < 50) {
             const msgsToSend = this.computers[i].process();
             for (const msg of msgsToSend) {
                 if (msg.to === 255) {
-                    console.log(`DONE MSG SENT 255: x=${msg.x},y=${msg.y}`);
-                    break;
+                    this.nat.receive(msg);
+                    continue;
                 }
                 if (msg.to < 0 || msg.to >= this.computers.length)
                     throw `Comp ${i} attempted to send message to unknown comp ${msg.to} with x=${msg.x},y=${msg.y}`;
@@ -82,7 +60,19 @@ class Network {
             }
 
             numOfCompWithNoOutput = msgsToSend.length === 0 ? (numOfCompWithNoOutput + 1) : 0;
+            numOfCompWithNoInput = this.computers[i].hasPacketsToProcess() ? 0 : (numOfCompWithNoInput + 1);
+            totalMsgsSent += msgsToSend.length;
             i = (i + 1) % this.computers.length;
+        }
+        this.nat.process().forEach(m => this.computers[m.to].receive(m));
+        return totalMsgsSent;
+    }
+
+    run() {
+        let count = 0;
+        while (count < 50) {
+            console.log(chalk.red(`MESSAGES TRANSMITTED: ${this.runUntilIdle()}`));
+            count++;
         }
     }
 }
@@ -90,6 +80,6 @@ class Network {
 export const run = () => {
     console.log(timer.start('day 23'));
     const network = new Network(50);
-    network.reboot();
+    network.run();
     console.log(timer.stop());
 };
