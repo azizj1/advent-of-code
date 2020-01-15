@@ -1,6 +1,7 @@
 import { timer } from '~/util/Timer';
 import gridsFile from './10.txt';
 import chalk from 'chalk';
+import BigIntMath from '~/util/BigIntMath';
 
 export interface IPoint {
     col: number;
@@ -28,6 +29,18 @@ export const getgcd = (a: number, b: number): number => {
     const remainder = numerator % denominator;
 
     return remainder === 0 ? denominator : getgcd(denominator, remainder);
+};
+
+export const getgcdN = (a: bigint, b: bigint): bigint => {
+    if (a === 0n)
+        return b;
+    if (b === 0n)
+        return a;
+    const numerator = BigIntMath.max(a, b);
+    const denominator = BigIntMath.min(a, b);
+    const remainder = numerator % denominator;
+
+    return remainder === 0n ? denominator : getgcdN(denominator, remainder);
 };
 
 export const getSlope = (from: IPoint, to: IPoint): IPoint => {

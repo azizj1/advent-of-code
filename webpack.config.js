@@ -38,6 +38,7 @@ module.exports = function (env) {
             '@babel/plugin-proposal-numeric-separator',
             '@babel/plugin-proposal-nullish-coalescing-operator',
             '@babel/plugin-proposal-optional-chaining',
+            '@babel/plugin-syntax-bigint',
             'lodash'
         ],
         cacheDirectory: DEBUG 
