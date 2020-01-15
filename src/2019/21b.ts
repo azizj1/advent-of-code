@@ -1,9 +1,10 @@
 import { IntcodeComputer } from '~/2019/9';
 import { getProgram } from '~/2019/21';
+import input from './21.txt';
 
 // each jump is 4 distances long
 export const run = () => {
-    const comp = new IntcodeComputer(getProgram());
+    const comp = new IntcodeComputer(getProgram(input));
     // if (isGround(4) && (isHole(1) || isHole(2) || isHole(3)) && (isGround(5) || isGround(8)))
     const cmds = [ // if
         'NOT A J',

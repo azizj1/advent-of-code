@@ -2,8 +2,8 @@ import { getRunsFromIniFile } from '~/util/util';
 import input from './21.txt';
 import { IntcodeComputer } from '~/2019/9';
 
-export const getProgram = () =>
-    getRunsFromIniFile(input)
+export const getProgram = (content: string) =>
+    getRunsFromIniFile(content)
         .map(v => v.content)[0]
         .replace(/\r?\n/, '')
         .split(',')
@@ -11,7 +11,7 @@ export const getProgram = () =>
 
 // each jump moves you by 4 distances
 export const run = () => {
-    const comp = new IntcodeComputer(getProgram());
+    const comp = new IntcodeComputer(getProgram(input));
     const cmds = [ // if
         'NOT A J', // hole 1dist away
         'NOT B T',

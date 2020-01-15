@@ -61,6 +61,9 @@ export class IntcodeComputer {
                 return { halt: false, output: NaN };
             }
             case '03': { // store an input
+                if (this.inputIndex >= this.inputs.length) {
+                    return { halt: true, output: NaN };
+                }
                 this.program[this.getIndex(this.nextIndex + 1, modes[0])] = this.inputs[this.inputIndex++];
                 this.nextIndex += size[code] + 1;
                 return { halt: false, output: NaN };
@@ -108,7 +111,7 @@ export class IntcodeComputer {
                 return { halt: true, output: NaN };
             }
             default: {
-                console.log('ERROR');
+                console.log('INTCODE ERROR 9.ts');
                 assertAllCasesHandled(code);
                 return { halt: false, output: NaN };
             }
@@ -125,8 +128,12 @@ export class IntcodeComputer {
             this.setInput(...inputs);
 
         while (this.hasMore()) {
-            const { output } = this.next();
+            const { output, halt } = this.next();
             if (!isNaN(output))
+                return output;
+            // it'll usually break from this.hasMore() because halt: true is usually just from code 99, but we can
+            // get halt = true from input command too, but halt: true can be sent from input command
+            if (halt)
                 return output;
         }
         return NaN;
@@ -149,9 +156,17 @@ export class IntcodeComputer {
         return this.program;
     }
 
+    get nextInputs() {
+        return this.inputs.slice(this.inputIndex);
+    }
+
     setInput(...inputs: number[]) {
         this.inputs = inputs;
         this.inputIndex = 0;
+    }
+
+    pushInputs(...inputs: number[]) {
+        this.inputs.push(...inputs);
     }
 
     updateProgram(index: number, value: number) {
