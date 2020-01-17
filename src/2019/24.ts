@@ -3,7 +3,7 @@ import input from './24.txt';
 import { timer } from '~/util/Timer';
 import { toString } from '~/2019/17';
 
-const sideLength = 5;
+export const sideLength = 5;
 
 export const toBinaryGrid = ({name, grid}: {name: string; grid: string[]}) => ({
     name,
