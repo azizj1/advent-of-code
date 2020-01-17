@@ -1,6 +1,7 @@
-import { getRunsFromIniFile } from '~/util/util';
+import { getRunsFromIniFile, last } from '~/util/util';
 import input from './24.txt';
 import { timer } from '~/util/Timer';
+import { toString } from '~/2019/17';
 
 const sideLength = 5;
 
@@ -50,16 +51,47 @@ export const afterOneMinute = (grid: number) => {
     return grid;
 };
 
-// export const toDisplay = (grid: number) => {
-//     const gridStr: string[][] = [];
-//     for (cle t)
-// }
+export const toDisplay = (grid: number) => {
+    const gridStr: string[] = [];
+    const hasBugAt = makeHasBugAt(grid);
+    for (let i = 0; i < sideLength * sideLength; i++) {
+        if (hasBugAt(i))
+            gridStr.push('#');
+        else
+            gridStr.push('.');
+    }
+    return gridStr.reduce((a, c, i) => {
+        if (i % sideLength === 0)
+            a.push([]);
+        last(a).push(c);
+        return a;
+    }, [] as string[][]);
+};
+
+export const print = (grid: number) => {
+    console.log(toString(toDisplay(grid), ' '));
+    console.log();
+};
+
+export const getRepeatedGrid = (grid: number) => {
+    const allGrids = new Set<number>();
+    let curr = grid;
+    while (!allGrids.has(curr)) {
+        allGrids.add(curr);
+        curr = afterOneMinute(curr);
+    }
+    return curr;
+};
 
 export const run = () => {
-    const sims = getSimulations().slice(0, 1);
+    const sims = getSimulations();
     for (const s of sims) {
+        print(s.grid);
+        print(afterOneMinute(s.grid));
+        print(afterOneMinute(afterOneMinute(s.grid)));
+        print(afterOneMinute(afterOneMinute(afterOneMinute(s.grid))));
         console.log(timer.start(`day 24 - name=${s.name}`));
-        console.log();
+        console.log(getRepeatedGrid(s.grid));
         console.log(timer.stop());
     }
 };
