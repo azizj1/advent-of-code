@@ -5,13 +5,15 @@ import { toString } from '~/2019/17';
 
 export const sideLength = 5;
 
-export const toBinaryGrid = ({name, grid}: {name: string; grid: string[]}) => ({
+export const toBinaryGrid = ({name, grid, iterations}: {name: string; iterations: number; grid: string[]}) => ({
     name,
+    iterations,
     grid: grid.map((g, i) => g === '#' ? (1 << i) : 0).reduce((a, c) => a + c, 0)
 });
 
 export const getSimulations = () => getRunsFromIniFile(input).map(ini => ({
-    name: ini.name,
+    name: ini.name.split(',')[0],
+    iterations: Number(ini.name.split(',')[1]),
     grid: ini.content.replace(/\r?\n/, '').split('').filter(s => s.trim() !== '')
 })).map(toBinaryGrid);
 
