@@ -1,0 +1,22 @@
+v
+> v
+  v
+  v
+  > PRESSURE - WEIGHT TOO LOW
+
+TOO heavy:
+hypercube + spool of cat6
+
+TOO light:
+spool of cat6
+hyercube
+weather machine
+weather machine + shell
+weather machine + shell + space heater
+weather machine + shell + space heater + spool of cat6
+
+    v
+  < > v
+  v v
+    v
+    > PRESSURE - WEIGHT TOO LOW
