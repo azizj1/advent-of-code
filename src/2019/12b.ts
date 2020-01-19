@@ -59,7 +59,6 @@ export const stepsForComponent = (moons: IPoint3D[], c: (moon: IPoint3D) => numb
 };
 
 export const lcm = (...n: number[]) => {
-    console.log(n);
     return n.reduce((a, c) => a * c / getgcd(a, c), 1);
 };
 
