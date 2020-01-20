@@ -3,7 +3,7 @@
 // within the file and not a function, so just importing it would run the code.
 async function run() {
     try {
-        const p = await import(/* webpackChunkName: "problem1" */ './2019/25');
+        const p = await import(/* webpackChunkName: "problem1" */ './2019/14');
         p.run();
     } catch (e) {
         console.error(e);
