@@ -2,9 +2,9 @@ import { getRunsFromIniFile } from '~/util/util';
 import input from './2.txt';
 import { timer } from '~/util/Timer';
 
-const getSimulations = () => getRunsFromIniFile(input).map(ini => ({
+export const getSimulations = () => getRunsFromIniFile(input).map(ini => ({
     name: ini.name,
-    ids: ini.content.split('\n').filter(s => s.trim() !== '')
+    ids: ini.content.split(/\r?\n/).filter(s => s.trim() !== '')
 }));
 
 const getIdInfo = (id: string): [number, number] => {
