@@ -1,7 +1,8 @@
 # Advent of Code Solutions
 
 ## 2019
-Worth taking notes on:
+All problems are complete, but only some were worthy of notes:
+
 * [Day 2b - System of Equations](src/2019/2b.md)
 * [Day 12b - N-Body Problem](src/2019/12b.md)
     * Least Common Multiple (LCM)
@@ -14,7 +15,11 @@ Worth taking notes on:
     * Combinatorics with Dijkstra.
 * Day 20a
 * Day 20b
-* Day 22b - Solving congruent equations, modular exponentiation, Fermats's Little Theorem, extended GCD and extended Euclidian algorithm, and modular inverse
-    * https://www.youtube.com/watch?v=kXL9UKujxJo
+* [Day 22b - Slam Shuffle](src/2019/22.md)
+    * Modular Inverse
+    * Linear Congruence Equations
+    * Modular Exponentiation
+    * Fermats's Little Theorem
+    * Extended Euclidian Algorithm
 * Day 24a - Bit manipulation
     * Why you can't assume first one will repeat first.

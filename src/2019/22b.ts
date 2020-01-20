@@ -20,6 +20,17 @@ export const isPrime = (n: number) => {
 };
 
 // modular exponentiation
+// x^9 =
+//    a = x^4
+//        b = x^2
+//            c = x -> return x
+//        -> return c * c (equiv to x * x)
+//    -> return b * b (equiv to x^2 * x^2)
+// -> return a * a * x (equiv to x^4 * x^4 * x = x^9)
+
+// Another way to look at it:
+//      x^9 = x^4 * x^4 * x
+//      x^4 is calculated the same way: x^2 * x^2
 export const modExp = (base: bigint, power: bigint, mod: bigint): bigint => {
     if (power === 0n)
         return 1n;

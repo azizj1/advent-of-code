@@ -75,7 +75,7 @@ const afterOneMinuteAtLvl = (grid: number, getNumOfAdjBugs: (index: number) => n
     let working = grid;
     const hasBugAt = makeHasBugAt(grid);
     for (let i = 0; i < sideLength * sideLength; i++) {
-        if (i === 12)
+        if (i === 12) // if at center
             continue;
         const adjBugs = getNumOfAdjBugs(i);
         if (hasBugAt(i) && adjBugs !== 1)
