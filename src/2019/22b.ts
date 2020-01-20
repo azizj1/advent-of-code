@@ -4,6 +4,10 @@ import input from './22.txt';
 import { first, getRunsFromIniFile } from '~/util/util';
 import chalk from 'chalk';
 
+// since all numbers can be factored into primes, we check if n is prime by seeing
+// if any primes less than or equal to sqrt(n) dvides into n
+// elaboration on the 6k +/- 1. If k = 1, the two numbers we check are 5 and 7.
+// if k = 2, then we check 11 and 13.
 export const isPrime = (n: number) => {
     if (n === 2 || n === 3)
         return true;
