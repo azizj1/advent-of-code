@@ -111,8 +111,6 @@ const toGraph = ({entrance, exit, grid, portals, portalLocations}: IMaze) => {
         if (equals(at, exit))
             break; // done
         const neighbors = getNeighbors(at).filter(isValid);
-        // console.info('atPoint', toKey(at), 'steps', steps, 'lastPortal', lastPortal, 'neighbors', neighbors.map(n => toKey(n)));
-        // console.info(grid.map((r, row) => r.map((c, col) => equals(at, {col, row}) ? 'X' : c).join('')).join('\n'));
         for (const neighbor of neighbors) {
             const neighborStr = toKey(neighbor);
             const newSteps = steps + 1;

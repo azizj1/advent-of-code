@@ -54,7 +54,8 @@ export const getSimulations = () => getRunsFromIniFile(input)
 export const getOresForFuel = (graph: WGraph<string, IRatio>, fuelNeeded = 1) => {
     const fuel = 'FUEL';
     const ore = 'ORE';
-    const needsHaves = new Map(graph.vertices.map<[string, [number, number]]>(v => [v, [0, 0]]));
+    const needsHaves =
+        new Map(graph.vertices.map<[string, [number, number]]>(v => [v, [0, 0]]));
 
     const helper = (node: string) => {
         if (graph.getAdjList(node).length === 0)
@@ -79,10 +80,14 @@ export const getOresForFuel = (graph: WGraph<string, IRatio>, fuelNeeded = 1) =>
         for (const reactant of reactants) {
             const { reactant: reactantNeededPerReaction } = graph.getWeight(node, reactant)!;
             const [rNeed, rHave] = needsHaves.get(reactant)!;
-            // keep the 'have's for the reactant the same, but increase the need for the reactants because
-            // we increased the 'have's for the product. E.g., if 4D + 3C -> 5B, and we made 10 Bs, prior to the
-            // for loop, multiplier = 2 and now we need to increase the needs of D by 8 and C by 6.
-            needsHaves.set(reactant, [rNeed + multiplier * reactantNeededPerReaction, rHave]);
+            // keep the 'have's for the reactant the same, but increase the need for the
+            // reactants because we increased the 'have's for the product. E.g., if 4D + 3C -> 5B,
+            // and we made 10 Bs above the for loop, multiplier = 2 and now we need to
+            // increase the needs of D by 8 and C by 6.
+            needsHaves.set(
+                reactant,
+                [rNeed + multiplier * reactantNeededPerReaction, rHave]
+            );
             helper(reactant);
         }
     };
