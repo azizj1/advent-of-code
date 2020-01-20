@@ -5,12 +5,13 @@ Worth taking notes on:
 * [Day 2b - System of Equations](src/2019/2b.md)
 * [Day 12b - N-Body Problem](src/2019/12b.md)
     * Least Common Multiple (LCM)
-* Day 14 for sure!
-* Day 15 - the trick with this is to not go backwards until you have to!
+* [Day 14 - Stoichiometry](src/2019/14.md)
+    * Fun DFS traversal problem
+    * Linear regression solution for part 2
 * [Day 18a - Robots Unlocking Keys and Doors](src/2019/18.md)
     * Dijkstra's algorithm
 * [Day 18b - Multiple Robots Unlocking Keys and Doors](src/2019/18b.md)
-    * Combinations with Dijkstra.
+    * Combinatorics with Dijkstra.
 * Day 20a
 * Day 20b
 * Day 22b - Solving congruent equations, modular exponentiation, Fermats's Little Theorem, extended GCD and extended Euclidian algorithm, and modular inverse
