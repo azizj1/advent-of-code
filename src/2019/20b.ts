@@ -18,17 +18,19 @@ export const toStringWithInnerOuterColor = (s: IMaze) =>
         ).join('\n');
 
 const toGraph = ({entrance, exit, grid, portals, portalLocations}: IMaze) => {
-    const graph = new WGraph<string, number>();
+    const graph = new WGraph<string, number>(); // weight is steps between portals
     const queue = new PriorityQueue<{at: IPoint; lastPortal: string; steps: number; level: number}>(p => -1 * p.steps);
     const visited = new Map<string, number>(); // IPoint,level -> distance from entrance
     const isValid = makeIsValid(grid, entrance);
 
     queue.enqueue({at: entrance, steps: 0, lastPortal: entranceKey, level: 0});
-    visited.set(toKey(entrance) + ',0', 0);
+    visited.set(toKey(entrance) + '|0', 0); // visited is now key|level
+
     while (!queue.isEmpty()) {
         const { at, steps, lastPortal, level } = queue.dequeue()!;
-        if (equals(at, exit) && level === -1)
+        if (equals(at, exit) && level === -1) // Z is at level 0, and it'll do level - 1 = -1
             break; // done
+
         const neighbors = getNeighbors(at).filter(isValid);
         for (const neighbor of neighbors) {
             const neighborStr = toKey(neighbor);
@@ -37,13 +39,15 @@ const toGraph = ({entrance, exit, grid, portals, portalLocations}: IMaze) => {
 
             if (!visited.has(visitedKey) || visited.get(visitedKey)! > newSteps) {
                 const neighborAtPortal = portalLocations.get(neighborStr);
+
                 if (neighborAtPortal != null) {
                     const neighborPortalName = neighborAtPortal.key;
-                    if (neighborPortalName === lastPortal) {
+                    if (neighborPortalName === lastPortal)
                         continue;
-                    }
+
                     const portalTo = first(portals.get(neighborPortalName)!.filter(p => !equals(p, neighbor)));
                     const newLevel = neighborAtPortal.isInner ? level + 1 : level - 1;
+
                     if ((neighborPortalName === entranceKey || neighborPortalName === exitKey) && level !== 0) {
                         visited.set(visitedKey, newSteps);
                         continue;
@@ -52,6 +56,7 @@ const toGraph = ({entrance, exit, grid, portals, portalLocations}: IMaze) => {
                         visited.set(visitedKey, newSteps);
                         continue;
                     }
+
                     queue.enqueue({
                         at: portalTo ?? neighbor, // possible if portal === 'ZZ'
                         lastPortal: neighborPortalName,

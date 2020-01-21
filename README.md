@@ -13,8 +13,8 @@ All problems are complete, but only some were worthy of notes:
     * Dijkstra's algorithm
 * [Day 18b - Multiple Robots Unlocking Keys and Doors](src/2019/18b.md)
     * Combinatorics with Dijkstra.
-* Day 20a
-* Day 20b
+* [Day 20a - Donut Maze](src/2019/20.md)
+* [Day 20b - Recursive Donut Maze](src/2019/20b.md)
 * [Day 22b - Slam Shuffle](src/2019/22.md)
     * Modular Inverse
     * Linear Congruence Equations
@@ -24,6 +24,7 @@ All problems are complete, but only some were worthy of notes:
 * [Day 24a - Bit manipulation](src/2019/24.md)
     * Why you can't assume first one will repeat first.
 * [Day 24b - More bit manipulation](src/2019/24b.md)
+
 ## 2018
 * [Day 2b - Find Similar Words](src/2018/2b.md)
     * Used the same idea as Word Ladder I.

@@ -29,6 +29,8 @@ const makeIsInner = (grid: string[][]) => (row: number, col: number, verticalCha
     return true;
 };
 
+// when it lands on a dot (.), it checks if the two squares in direction X are both letters If letters,
+// then we know the dot (.) is a portal.
 const toMaze = ({name, grid}: {name: string; grid: string[][]}): IMaze => {
     const isInner = makeIsInner(grid);
     const getKey = (i: number, j: number) => {
@@ -110,6 +112,8 @@ const toGraph = ({entrance, exit, grid, portals, portalLocations}: IMaze) => {
         const { at, steps, lastPortal } = queue.dequeue()!;
         if (equals(at, exit))
             break; // done
+        // we don't check visited here because we may want to revisit a visited node if the steps are shorter
+        // neighbors are reachable dots (.), some of which may be portals
         const neighbors = getNeighbors(at).filter(isValid);
         for (const neighbor of neighbors) {
             const neighborStr = toKey(neighbor);
