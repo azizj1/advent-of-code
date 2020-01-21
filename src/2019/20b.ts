@@ -31,6 +31,8 @@ const toGraph = ({entrance, exit, grid, portals, portalLocations}: IMaze) => {
         if (equals(at, exit) && level === -1) // Z is at level 0, and it'll do level - 1 = -1
             break; // done
 
+        // we don't check visited here because we may want to revisit a visited node if the steps are shorter
+        // neighbors are reachable dots (.), some of which may be portals
         const neighbors = getNeighbors(at).filter(isValid);
         for (const neighbor of neighbors) {
             const neighborStr = toKey(neighbor);
