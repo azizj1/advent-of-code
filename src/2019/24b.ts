@@ -35,10 +35,10 @@ const isAdjToInner = (index: number) => ((1 << index) & adjToInnerMask) > 0;
 const isAdjToOuter = (index: number) => ((1 << index) & perimeterMask) > 0;
 
 const indexToInnerAdjIndices = new Map([
-    [7, [0, 1, 2, 3, 4]],
-    [11, [0, 5, 10, 15, 20]],
-    [13, [4, 9, 14, 19, 24]],
-    [17, [20, 21, 22, 23, 24]]
+    [7, [0, 1, 2, 3, 4]], // above ?
+    [11, [0, 5, 10, 15, 20]], // left of ?
+    [13, [4, 9, 14, 19, 24]], // right of ?
+    [17, [20, 21, 22, 23, 24]] // below ?
 ]);
 
 // inverse of indexToInnerAdjIndices, i.e.,
@@ -55,9 +55,9 @@ const indexToOuterAdjIndices = Array.from(indexToInnerAdjIndices.entries()).map(
     }, new Map<number, number[]>());
 
 const makeGetNumberOfAdjBugsPlutonian =
-    (grids: number[]) => // maps from level -> grid
+    (grids: number[]) => // 0th grid is inner-most
     (level: number) => // current level
-    (index: number) => // index to get
+    (index: number) => // info about index's neighbors at level
 {
     const grid = grids[level] ?? 0;
     const innerGrid = grids[level - 1] ?? 0;
