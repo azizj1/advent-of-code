@@ -189,7 +189,11 @@ export const getSimulations = () => getRunsFromIniFile(input).map(ini => {
 });
 
 export const applyTechniques =
-    (techniques: ((constant: bigint, slope: bigint, mod: bigint) => [bigint, bigint])[], size: number | bigint) =>
+    (
+        // array of technique functions, where each returns [constant, slope]
+        techniques: ((constant: bigint, slope: bigint, mod: bigint) => [bigint, bigint])[],
+        size: number | bigint
+    ) =>
     (initConstant = 0n, initSlope = 1n) =>
 {
     let constant = initConstant;
