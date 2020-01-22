@@ -21,7 +21,7 @@ const getClaimWithNoOverlap = (claims: IClaim[]) => {
 };
 
 export const run = () => {
-    const sims = getSimulations().slice(-1);
+    const sims = getSimulations().slice(0, 1);
     for (const s of sims) {
         console.log(timer.start(`day 3 name=${s.name} claims=${s.claims.length}`));
         console.log(getClaimWithNoOverlap(s.claims));

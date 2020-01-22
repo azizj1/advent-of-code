@@ -1,5 +1,4 @@
 export default class BigIntMath {
-
 	static max(...values: bigint[]) {
 		if (values.length === 0) {
 			return -1n * BigInt(Number.MIN_SAFE_INTEGER);

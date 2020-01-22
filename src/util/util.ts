@@ -9,6 +9,20 @@ export const getRunsFromIniFile = (content: string) =>
         })
 );
 
+export const getRunsFromIniCommaSep = (content: string, delim = ',') =>
+    getRunsFromIniFile(content)
+        .map(({name, content}) => ({
+            name,
+            content: content.split(delim).filter(s => s.trim() !== '')
+        }));
+
+export const getRunsFromIniNewlineSep = (content: string) =>
+    getRunsFromIniFile(content)
+        .map(({name, content}) => ({
+            name,
+            content: content.split(/\r?\n/).filter(s => s.trim() !== '')
+        }));
+
 let savedConsoleInfo: ((message?: string) => void) | null = null;
 export const dropConsoleInfo = () => {
     savedConsoleInfo = console.info;
