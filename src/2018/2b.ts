@@ -30,7 +30,7 @@ export const perfTest = async () => {
     const files = (await fs.readdir('src/2018/day2')).slice(0, -1);
     for (let i = 0; i < files.length; i++) {
         const bigInput = await import(/* webpackChunkName: "2018-day2-perfTest" */ `./day2/${files[i]}`);
-        const ids = bigInput.default.split(/\r?\n/).filter(s => s.trim() !== '');
+        const ids = bigInput.default.split(/\r?\n/).filter((s: string) => s.trim() !== '');
         console.log(timer.start(`2018 day 2 performance test files=${files[i]}`));
         console.log(corpusToGeneric(ids));
         console.log(timer.stop());
