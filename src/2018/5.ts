@@ -1,4 +1,4 @@
-import { getRunsFromIniFile } from '~/util/util';
+import { getRunsFromIniFile, declareProblem, last, declareSubproblem } from '~/util/util';
 import input from './5.txt';
 import { timer } from '~/util/Timer';
 
@@ -26,14 +26,42 @@ const react = (polymer: string) => {
             index++;
         }
     }
-    return result;
+    return result.length;
 };
 
-export const run = () => {
+const react2 = (polymer: string) => {
+    const result = [''];
+    let index = 0;
+    while (index < polymer.length) {
+        const char = polymer.charAt(index);
+        if (willReact(last(result), char))
+            result.pop();
+        else
+            result.push(char);
+        index++;
+    }
+    // -1 because we added an empty string ('') in the
+    // beginning so that last(result) doesn't return undefined
+    return result.length - 1;
+};
+
+const runAg = (ag: (polymer: string) => number, title: string) => {
+    declareSubproblem(title);
     const sims = getSimulations();
     for (const s of sims) {
         console.log(timer.start(`5 name=${s.name}`));
-        console.log(react(s.polymer).length);
+        console.log(ag(s.polymer));
         console.log(timer.stop());
     }
+};
+
+export const run = () => {
+    declareProblem('5a');
+    [{
+        f: react,
+        n: 'recreate string'
+    }, {
+        f: react2,
+        n: 'stack'
+    }].forEach(({f, n}) => runAg(f, n));
 };

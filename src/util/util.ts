@@ -1,3 +1,5 @@
+import chalk from 'chalk';
+
 export const last = <T>(arr: T[]) => arr[arr.length - 1];
 export const first = <T>(arr: T[]) => arr[0];
 
@@ -33,3 +35,6 @@ export const resetConsoleInfo = () => {
     if (savedConsoleInfo != null)
         console.info = savedConsoleInfo;
 };
+
+export const declareProblem = (title: string) => console.log(chalk.redBright(`====PROBLEM ${title}====`));
+export const declareSubproblem = (title: string) => console.log(chalk.red(`==sub ${title}==`));

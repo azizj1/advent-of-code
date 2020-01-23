@@ -28,3 +28,6 @@ All problems are complete, but only some were worthy of notes:
 ## 2018
 * [Day 2b - Find Similar Words](src/2018/2b.md)
     * Used the same idea as Word Ladder I.
+* [Day 5 - Polymer Reactions](src/2018/5.md)
+    * Good example of a Stack
+
