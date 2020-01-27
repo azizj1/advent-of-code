@@ -14,10 +14,14 @@ interface IBound {
     rowBounds: readonly [number, number];
 }
 
-const getName = (i: number) => String.fromCharCode('A'.charCodeAt(0) + Math.trunc(i / 26), 'A'.charCodeAt(0) + i % 26);
+const getName = (i: number) => String.fromCharCode(
+    'A'.charCodeAt(0) + Math.trunc(i / 26),
+    'A'.charCodeAt(0) + i % 26
+);
 
 export const getSimulations = () => getRunsFromIniNewlineSep(input).map(ini => ({
-    name: ini.name,
+    name: ini.name.split(',')[0],
+    maxDistance: Number(ini.name.split(',')[1]),
     coordinates: ini.content.map((c, i) => {
         const [x, y] = c.split(', ').map(Number);
         return {
@@ -28,7 +32,7 @@ export const getSimulations = () => getRunsFromIniNewlineSep(input).map(ini => (
     })
 }));
 
-const getBounds = (points: IPoint[]): IBound => {
+export const getBounds = (points: IPoint[]): IBound => {
     const cloned = [...points];
     cloned.sort((a, b) => a.col - b.col);
     const colBounds = [first(cloned).col, last(cloned).col] as const;
@@ -39,7 +43,7 @@ const getBounds = (points: IPoint[]): IBound => {
     return { colBounds, rowBounds };
 };
 
-const makeIsInBounds = (bounds: IBound) => (p: IPoint) => {
+export const makeIsInBounds = (bounds: IBound) => (p: IPoint) => {
     const { row, col } = p;
     const { rowBounds: [minR, maxR], colBounds: [minC, maxC] } = bounds;
     if (row < minR || row > maxR || col < minC || col > maxC)
@@ -79,6 +83,8 @@ const getFiniteAreas = (points: INamedPoint[]) => {
                 areaPerCoordinate.set(contenderName, areaPerCoordinate.get(contenderName)! - 1);
                 continue;
             }
+            // the case of contenderDistance > distance shouldn't happen, because otherwise it
+            // would've been popped
         }
 
         let neighbors = getNeighbors(p);
