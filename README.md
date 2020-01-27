@@ -30,4 +30,5 @@ All problems are complete, but only some were worthy of notes:
     * Used the same idea as Word Ladder I.
 * [Day 5 - Polymer Reactions](src/2018/5.md)
     * Good example of a Stack
-
+* [Day 6 - Coordinate Proximity](src/2018/6.md)
+    * First use of BFS in 2018.

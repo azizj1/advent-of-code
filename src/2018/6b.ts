@@ -51,10 +51,10 @@ const getRegionClosestToAll2 = (maxDistance: number, points: IPoint[]) => {
     const visited = new GenericSet<IPoint>(toKey);
 
     const helper = (p: IPoint): number => {
-        visited.add(p);
-        if (getDistanceAll(p) >= maxDistance)
+        if (visited.has(p))
             return 0;
 
+        visited.add(p);
         return 1 + getNeighbors(p)
             .filter(isInBounds)
             .filter(n => !visited.has(n))
@@ -62,6 +62,7 @@ const getRegionClosestToAll2 = (maxDistance: number, points: IPoint[]) => {
             .map(helper)
             .reduce((a, c) => a + c, 0);
     };
+
     return helper(getCenter(points));
 };
 
