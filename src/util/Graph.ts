@@ -1,8 +1,8 @@
 import { Queue } from '~/util/Queue';
 
 export class Graph<T> {
-    private vertices: Set<T>;
-    private edges: Map<T, Set<T>>;
+    public vertices: Set<T>;
+    public edges: Map<T, Set<T>>;
 
     constructor() {
         this.vertices = new Set();
@@ -33,6 +33,13 @@ export class Graph<T> {
 
     hasEdge(from: T, to: T) {
         return this.edges.has(from) && this.edges.get(from)!.has(to);
+    }
+
+    get size() {
+        return {
+            vertices: this.vertices.size,
+            edges: this.edges.size
+        };
     }
 
     // would be identical to BFS search if it wasn't for the added `distances` Map, which tracks the distance of node u

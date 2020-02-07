@@ -32,3 +32,5 @@ All problems are complete, but only some were worthy of notes:
     * Good example of a Stack
 * [Day 6 - Coordinate Proximity](src/2018/6.md)
     * First use of BFS in 2018.
+* [Day 7 - The Sum of Its Parts](src/2018/7.md)
+    * Topological Sort
