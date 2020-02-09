@@ -37,3 +37,7 @@ All problems are complete, but only some were worthy of notes:
     * Priority queue
 * [Day 7b](src/2018/7b.md)
     * Coordinated lexicographical toplogical sort
+* [Day 8 - Tree](src/2018/8.md)
+    * N-ary Tree
+    * Tree `toString()` explained
+

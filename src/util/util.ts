@@ -15,7 +15,7 @@ export const getRunsFromIniCommaSep = (content: string, delim = ',') =>
     getRunsFromIniFile(content)
         .map(({name, content}) => ({
             name,
-            content: content.split(delim).filter(s => s.trim() !== '')
+            content: content.replace(/\r?\n/, '').split(delim).filter(s => s.trim() !== '')
         }));
 
 export const getRunsFromIniNewlineSep = (content: string) =>
