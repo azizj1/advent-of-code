@@ -40,4 +40,6 @@ All problems are complete, but only some were worthy of notes:
 * [Day 8 - Tree](src/2018/8.md)
     * N-ary Tree
     * Tree `toString()` explained
+* [Day 8b - Tree](src/2018/8b.md)
+    * N-ary Tree class
 

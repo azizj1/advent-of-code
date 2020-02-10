@@ -1,4 +1,4 @@
-import { getRunsFromIniCommaSep, last, declareProblem } from '~/util/util';
+import { getRunsFromIniCommaSep, last, declareProblem, declareSubproblem } from '~/util/util';
 import input from './8.txt';
 import { timer } from '~/util/Timer';
 
@@ -7,7 +7,7 @@ export const getSimulations = () => getRunsFromIniCommaSep(input, ' ').map(ini =
     list: ini.content.map(Number)
 }));
 
-interface INode<T> {
+export interface INode<T> {
     children: INode<T>[];
     metadata: T;
 }
@@ -23,10 +23,10 @@ export class NaryTree<T extends IBaseNode> {
         this.root = root;
     }
 
-    getSum() {
-        const helper = (node: INode<T>): number =>
-            (node.metadata as unknown as number) + node.children.reduce((a, c) => a + helper(c), 0);
-        return this.root == null ? 0 : helper(this.root);
+    getSum(add: (a: T, b: T) => T, nil: T) {
+        const helper = (node: INode<T>): T =>
+            add(node.metadata, node.children.reduce((a, c) => add(a, helper(c)), nil));
+        return this.root == null ? nil : helper(this.root);
     }
 
     toString() {
@@ -58,63 +58,78 @@ export class NaryTree<T extends IBaseNode> {
         if (node.children.length === 0)
             return [node.metadata.toString()];
 
-        if (node.children.length === 1)
-            return [
-                node.metadata == null ? 'null' : node.metadata.toString(),
-                ...this.toStringAtNode(node.children[0]).map(this.toPrint('└──')),
-            ];
         const childrenLines = [node.metadata == null ? 'null' : node.metadata.toString()];
-        for (let i = 0; i < node.children.length - 1; i++)
+        for (let i = 0; i < node.children.length - 1; i++) // all but last children
             childrenLines.push(...this.toStringAtNode(node.children[i]).map(this.toPrint('├──', '|')));
 
         childrenLines.push(...this.toStringAtNode(last(node.children)).map(this.toPrint('└──', ' ')));
         return childrenLines;
     }
 
-    private toPrint = (first: string, other?: string) => (d: string, i: number, a: string[]) => {
-        if (a.length === 0)
-            return '';
-        else if (i === 0)
+    private toPrint = (first: string, other: string) => (d: string, i: number) => {
+        if (i === 0)
             return first + d;
         return other + '  ' + d;
     }
+
+    // see src/2018/8.md
+    // type T is the type of the input,
+    // type E is the type you want for metadata
+    static from<T, E>(arr: T[], addToMeta: (a: E, b: T) => E, nil: E) {
+        const helper = (startIndex: number): {node: INode<E>; nextIndex: number} => {
+            const node: INode<E> = {
+                children: [],
+                metadata: nil
+            };
+            const numOfChildren = arr[startIndex] ?? 0;
+            const numOfMeta = arr[startIndex + 1] ?? 0;
+            let childIndex = startIndex + 2;
+
+            for (let i = 0; i < numOfChildren && childIndex < arr.length; i++) {
+                const childResult = helper(childIndex);
+                childIndex = childResult.nextIndex;
+                node.children.push(childResult.node);
+            }
+
+            for (let i = 0; i < numOfMeta && childIndex < arr.length; i++) {
+                node.metadata = addToMeta(node.metadata, arr[childIndex++]);
+            }
+            return {
+                node,
+                nextIndex: childIndex
+            };
+        };
+        return new NaryTree(helper(0).node);
+    }
 }
 
-const toTree = ({list}: {list: number[]}) => {
-    const helper = (startIndex: number): {node: INode<number>; nextIndex: number} => {
-        const node: INode<number> = {
-            children: [],
-            metadata: 0
-        };
-        const numOfChildren = list[startIndex] ?? 0;
-        const numOfMeta = list[startIndex + 1] ?? 0;
-        let childIndex = startIndex + 2;
+const preCompute = (list: number[]) => {
+    const tree = NaryTree.from<number, number>(list, (a, b) => a + b, 0);
+    return tree.getSum((a, b) => a + b, 0);
+};
 
-        for (let i = 0; i < numOfChildren && childIndex < list.length; i++) {
-            const childResult = helper(childIndex);
-            childIndex = childResult.nextIndex;
-            node.children.push(childResult.node);
-        }
+const postCompute = (list: number[]) => {
+    const tree = NaryTree.from<number, number[]>(list, (a, b) => [...a, b], []);
+    return tree.getSum((a, b) => a.concat(b), []).reduce((a, c) => a + c, 0);
+};
 
-        for (let i = 0; i < numOfMeta && childIndex < list.length; i++) {
-            node.metadata += list[childIndex++];
-        }
-        return {
-            node,
-            nextIndex: childIndex
-        };
-    };
-    return helper(0);
+const runAg = (ag: (list: number[]) => number, title: string) => {
+    declareSubproblem(title);
+    const sims = getSimulations().slice(0, 1);
+    for (const s of sims) {
+        console.log(timer.start(`name=${s.name} size=${s.list.length}`));
+        console.log(ag(s.list));
+        console.log(timer.stop());
+    }
 };
 
 export const run = () => {
     declareProblem('8');
-    const sims = getSimulations();
-    for (const s of sims) {
-        console.log(timer.start(`name=${s.name} size=${s.list.length}`));
-        const tree = new NaryTree(toTree(s).node);
-        console.log(tree.toString());
-        console.log(tree.getSum());
-        console.log(timer.stop());
-    }
+    [{
+        f: preCompute,
+        n: 'add first'
+    }, {
+        f: postCompute,
+        n: 'add later'
+    }].map(a => runAg(a.f, a.n));
 };
