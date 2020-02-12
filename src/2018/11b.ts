@@ -1,9 +1,9 @@
-import { declareProblem } from '~/util/util';
-import { getSimulations, makeGetLargestPower, ISize, getPowerLevels } from '~/2018/11';
+import { declareProblem, declareSubproblem } from '~/util/util';
+import { getSimulations, makeGetLargestPower, getPowerLevels, ISize, makeGetPower } from '~/2018/11';
 import { timer } from '~/util/Timer';
 import { IPoint, toKey, add } from '~/2019/10';
 
-const getLargestPowerAndSize = (serial: number) => {
+export const getLargestPowerAndSize = (serial: number) => {
     const getLargestPower = makeGetLargestPower({height: 300, width: 300}, serial);
     let maxPower = {coordinate: 'null', power: -1};
     let maxSize = 1;
@@ -20,7 +20,7 @@ const getLargestPowerAndSize = (serial: number) => {
     return `${maxPower.coordinate},${maxSize}`;
 };
 
-const getLargestPowerAndSize2 = (serial: number) => {
+export const getLargestPowerAndSize2 = (serial: number) => {
     const maxSide = 300;
     // col,row,size -> powerLevel
     const cache = new Map(
@@ -58,13 +58,99 @@ const getLargestPowerAndSize2 = (serial: number) => {
         cache.set(cacheKey, powerLevel);
         return powerLevel;
     };
+
+    let maxPower = 0;
+    let maxPowerStart = {row: 0, col: 0};
+    let maxPowerSize = 300;
+    for (let s = 1; s <= 300; s++) {
+        let maxPowerForSize = 0;
+        for (let i = 0; i <= maxSide - s; i++) {
+            for (let j = 0; j <= maxSide - s; j++) {
+                const powerLevel = helper(s, {row: i, col: j});
+                if (powerLevel > maxPower) {
+                    maxPower = powerLevel;
+                    maxPowerStart = {row: i, col: j};
+                    maxPowerSize = s;
+                }
+                if (powerLevel > maxPowerForSize)
+                    maxPowerForSize = powerLevel;
+            }
+        }
+        if (maxPowerForSize === 0)
+            break;
+         console.log('cacheSize', cache.size, 'size', s, 'maxPowerForSize', maxPowerForSize);
+    }
+    console.log('maxPower', maxPower, 'maxPowerStart', maxPowerStart, 'maxPowerSize', maxPowerSize);
+    return maxPower;
+};
+
+export const getTotalPowerInGrid = (serial: number) => {
+    const maxSide = 300;
+    // col,row,size -> powerLevel
+    const total = Array.from(getPowerLevels({height: maxSide, width: maxSide}, serial).values())
+            .reduce((a, c) => a + c, 0);
+    return total;
+};
+
+export const getPowerLevelsGrid = (grid: ISize, serial: number) => {
+    const powerLevels = Array.from({length: grid.height + 1}, () => [0]);
+    powerLevels[0] = Array.from({length: grid.width + 1}, () => 0);
+    const getPower = makeGetPower(serial);
+    for (let i = 1; i <= grid.height; i++)
+        for (let j = 1; j <= grid.width; j++)
+            powerLevels[i][j] = getPower({row: i - 1, col: j - 1});
+    return powerLevels;
+};
+
+export const toSummedAreaTable = (powerGrid: number[][]) => {
+    for (let i = 1; i < powerGrid.length; i++)
+        for (let j = 1; j < powerGrid[i].length; j++)
+            powerGrid[i][j] = powerGrid[i][j] + powerGrid[i][j - 1] + powerGrid[i - 1][j] - powerGrid[i - 1][j - 1];
+    return powerGrid;
+};
+
+export const getLargestPowerAndSize3 = (serial: number) => {
+    const maxSide = 300;
+    let powerGrid = getPowerLevelsGrid({height: maxSide, width: maxSide}, serial);
+    powerGrid = toSummedAreaTable(powerGrid);
+
+    let maxPower = 0;
+    let maxSize = 1;
+    let maxStarting = {x: 0, y: 0};
+    for (let s = 1; s <= maxSide; s++)
+        for (let i = s; i <= maxSide; i++)
+            for (let j = s; j <= maxSide; j++) {
+                const power = powerGrid[i][j] - powerGrid[i][j - s] - powerGrid[i - s][j] + powerGrid[i - s][j - s];
+                if (power > maxPower) {
+                    maxPower = power;
+                    maxSize = s;
+                    maxStarting = {y: i, x: j};
+                }
+            }
+
+    console.log('maxPower', maxPower, 'maxSize', maxSize, 'maxStarting', maxStarting);
+    return maxPower;
+};
+
+export const runAg = (ag: (serial: number) => number, title: string) => {
+    declareSubproblem(title);
+    for (const s of getSimulations()) {
+        console.log(timer.start(`name=${s.name},serial=${s.serial}`));
+        console.log(ag(s.serial));
+        console.log(timer.stop());
+    }
 };
 
 export const run = () => {
     declareProblem('2018 11b');
-    for (const s of getSimulations()) {
-        console.log(timer.start(`name=${s.name},serial=${s.serial}`));
-        console.log(getLargestPowerAndSize(s.serial));
-        console.log(timer.stop());
-    }
+    [{
+        f: getLargestPowerAndSize3,
+        n: 'summed area table'
+    }, {
+        f: getLargestPowerAndSize2,
+        n: 'divide and conquer'
+    }, {
+        f: getTotalPowerInGrid,
+        n: 'only 300'
+    }].forEach(a => runAg(a.f, a.n));
 };

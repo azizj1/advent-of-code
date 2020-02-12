@@ -16,7 +16,7 @@ export const getSimulations = () => [{
     name: '3'
 }];
 
-const makeGetPower = (serial: number) => ({row, col}: IPoint) => {
+export const makeGetPower = (serial: number) => ({row, col}: IPoint) => {
     const rackId = (col + 1) + 10;
     let power = (row + 1) * rackId + serial;
     power *= rackId;
