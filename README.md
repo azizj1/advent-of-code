@@ -42,4 +42,3 @@ All problems are complete, but only some were worthy of notes:
     * Tree `toString()` explained
 * [Day 8b - Tree](src/2018/8b.md)
     * N-ary Tree class
-

@@ -37,10 +37,9 @@ const makeGetTotalPower = (square: ISize, powerLevels: Map<string, number>) => (
     return totalPower;
 };
 
-const getPowerLevels = (grid: ISize, serial: number) => {
+export const getPowerLevels = (grid: ISize, serial: number) => {
     const powerLevels = new Map<string, number>();
     const getPower = makeGetPower(serial);
-    console.log('here');
     for (let i = 0; i < grid.height; i++)
         for (let j = 0; j < grid.width; j++) {
             const p = {row: i, col: j};

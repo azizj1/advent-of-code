@@ -1,20 +1,7 @@
 import { declareProblem } from '~/util/util';
-import { getSimulations, makeGetLargestPower, ISize } from '~/2018/11';
+import { getSimulations, makeGetLargestPower, ISize, getPowerLevels } from '~/2018/11';
 import { timer } from '~/util/Timer';
-
-const makeAllPowerGrids = (grid: ISize, powerLevelsSizeOne: Map<string, number>) => {
-    const { height, width } = grid;
-    const allPowerGridsPerSize = new Map([[1, powerLevelsSizeOne]]);
-    const helper = (size: number): Map<string, number> => {
-        if (allPowerGridsPerSize.has(size))
-            return allPowerGridsPerSize.get(size)!;
-
-        const powerLevels = new Map<string, number>();
-        const prevPowerLevels = size % 2 === 0 ? helper(size / 2) : helper(size - 1);
-
-        return powerLevels;
-    };
-};
+import { IPoint, toKey, add } from '~/2019/10';
 
 const getLargestPowerAndSize = (serial: number) => {
     const getLargestPower = makeGetLargestPower({height: 300, width: 300}, serial);
@@ -31,6 +18,46 @@ const getLargestPowerAndSize = (serial: number) => {
     }
 
     return `${maxPower.coordinate},${maxSize}`;
+};
+
+const getLargestPowerAndSize2 = (serial: number) => {
+    const maxSide = 300;
+    // col,row,size -> powerLevel
+    const cache = new Map(
+        Array.from(getPowerLevels({height: maxSide, width: maxSide}, serial).entries())
+            .map(([p, v]) => [`${p},1`, v])
+    );
+    const helper = (size: number, from: IPoint): number => {
+        const cacheKey = `${toKey(from)},${size}`;
+        if (cache.has(cacheKey))
+            return cache.get(cacheKey)!;
+
+        if (from.row + size > maxSide || from.col + size > maxSide)
+            return -Infinity;
+
+        if (size % 2 === 0) {
+            const quarterSize = size / 2;
+            const powerLevel =
+                helper(quarterSize, from) +
+                helper(quarterSize, add(from)({row: quarterSize, col: 0})) +
+                helper(quarterSize, add(from)({row: 0, col: quarterSize})) +
+                helper(quarterSize, add(from)({row: quarterSize, col: quarterSize}));
+            cache.set(cacheKey, powerLevel);
+            return powerLevel;
+        }
+        const smallerSize = size - 1;
+        let powerLevel = helper(smallerSize, from);
+        // add bottom row
+        for (let i = 0; i < size; i++)
+            powerLevel += cache.get(`${toKey(add(from)({row: smallerSize, col: i}))},1`)!;
+
+        // add right column
+        for (let i = 0; i < smallerSize; i++)
+            powerLevel += cache.get(`${toKey(add(from)({row: i, col: smallerSize}))},1`)!;
+
+        cache.set(cacheKey, powerLevel);
+        return powerLevel;
+    };
 };
 
 export const run = () => {
