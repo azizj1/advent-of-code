@@ -3,6 +3,7 @@ import { getSimulations, makeGetLargestPower, getPowerLevels, ISize, makeGetPowe
 import { timer } from '~/util/Timer';
 import { IPoint, toKey, add } from '~/2019/10';
 
+// O(n^5)
 export const getLargestPowerAndSize = (serial: number) => {
     const getLargestPower = makeGetLargestPower({height: 300, width: 300}, serial);
     let maxPower = {coordinate: 'null', power: -1};
@@ -20,6 +21,7 @@ export const getLargestPowerAndSize = (serial: number) => {
     return `${maxPower.coordinate},${maxSize}`;
 };
 
+// O(n^4)
 export const getLargestPowerAndSize2 = (serial: number) => {
     const maxSide = 300;
     // col,row,size -> powerLevel
@@ -64,8 +66,8 @@ export const getLargestPowerAndSize2 = (serial: number) => {
     let maxPowerSize = 300;
     for (let s = 1; s <= 300; s++) {
         let maxPowerForSize = 0;
-        for (let i = 0; i <= maxSide - s; i++) {
-            for (let j = 0; j <= maxSide - s; j++) {
+        for (let i = 1; i <= maxSide - s + 1; i++) {
+            for (let j = 1; j <= maxSide - s + 1; j++) {
                 const powerLevel = helper(s, {row: i, col: j});
                 if (powerLevel > maxPower) {
                     maxPower = powerLevel;
@@ -84,31 +86,26 @@ export const getLargestPowerAndSize2 = (serial: number) => {
     return maxPower;
 };
 
-export const getTotalPowerInGrid = (serial: number) => {
-    const maxSide = 300;
-    // col,row,size -> powerLevel
-    const total = Array.from(getPowerLevels({height: maxSide, width: maxSide}, serial).values())
-            .reduce((a, c) => a + c, 0);
-    return total;
-};
-
 export const getPowerLevelsGrid = (grid: ISize, serial: number) => {
     const powerLevels = Array.from({length: grid.height + 1}, () => [0]);
     powerLevels[0] = Array.from({length: grid.width + 1}, () => 0);
     const getPower = makeGetPower(serial);
     for (let i = 1; i <= grid.height; i++)
         for (let j = 1; j <= grid.width; j++)
-            powerLevels[i][j] = getPower({row: i - 1, col: j - 1});
+            powerLevels[i][j] = getPower({row: i, col: j});
     return powerLevels;
 };
 
 export const toSummedAreaTable = (powerGrid: number[][]) => {
     for (let i = 1; i < powerGrid.length; i++)
         for (let j = 1; j < powerGrid[i].length; j++)
-            powerGrid[i][j] = powerGrid[i][j] + powerGrid[i][j - 1] + powerGrid[i - 1][j] - powerGrid[i - 1][j - 1];
+            powerGrid[i][j] = powerGrid[i][j]
+                                + powerGrid[i][j - 1] + powerGrid[i - 1][j]
+                                - powerGrid[i - 1][j - 1];
     return powerGrid;
 };
 
+// O(n^3)
 export const getLargestPowerAndSize3 = (serial: number) => {
     const maxSide = 300;
     let powerGrid = getPowerLevelsGrid({height: maxSide, width: maxSide}, serial);
@@ -120,7 +117,9 @@ export const getLargestPowerAndSize3 = (serial: number) => {
     for (let s = 1; s <= maxSide; s++)
         for (let i = s; i <= maxSide; i++)
             for (let j = s; j <= maxSide; j++) {
-                const power = powerGrid[i][j] - powerGrid[i][j - s] - powerGrid[i - s][j] + powerGrid[i - s][j - s];
+                const power = powerGrid[i][j]
+                                - powerGrid[i][j - s] - powerGrid[i - s][j]
+                                + powerGrid[i - s][j - s];
                 if (power > maxPower) {
                     maxPower = power;
                     maxSize = s;
@@ -149,8 +148,5 @@ export const run = () => {
     }, {
         f: getLargestPowerAndSize2,
         n: 'divide and conquer'
-    }, {
-        f: getTotalPowerInGrid,
-        n: 'only 300'
     }].forEach(a => runAg(a.f, a.n));
 };

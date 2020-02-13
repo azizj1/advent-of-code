@@ -42,3 +42,5 @@ All problems are complete, but only some were worthy of notes:
     * Tree `toString()` explained
 * [Day 8b - Tree](src/2018/8b.md)
     * N-ary Tree class
+* [Day 11 - Summed Area Table](src/2018/11.md)
+    * Summed Area Table
