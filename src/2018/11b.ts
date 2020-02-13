@@ -25,30 +25,29 @@ export const getLargestPowerAndSize = (serial: number) => {
 export const getLargestPowerAndSize2 = (serial: number) => {
     const maxSide = 300;
     // col,row,size -> powerLevel
+    // initially, it stores col,row,1 (i.e., power levels at individual cells),
+    // which is 90,000 entries.
     const cache = new Map(
         Array.from(getPowerLevels({height: maxSide, width: maxSide}, serial).entries())
             .map(([p, v]) => [`${p},1`, v])
     );
-    const helper = (size: number, from: IPoint): number => {
+    const divideConquer = (size: number, from: IPoint): number => {
         const cacheKey = `${toKey(from)},${size}`;
         if (cache.has(cacheKey))
             return cache.get(cacheKey)!;
 
-        if (from.row + size > maxSide || from.col + size > maxSide)
-            return -Infinity;
-
         if (size % 2 === 0) {
             const quarterSize = size / 2;
             const powerLevel =
-                helper(quarterSize, from) +
-                helper(quarterSize, add(from)({row: quarterSize, col: 0})) +
-                helper(quarterSize, add(from)({row: 0, col: quarterSize})) +
-                helper(quarterSize, add(from)({row: quarterSize, col: quarterSize}));
+                divideConquer(quarterSize, from) +
+                divideConquer(quarterSize, add(from)({row: quarterSize, col: 0})) +
+                divideConquer(quarterSize, add(from)({row: 0, col: quarterSize})) +
+                divideConquer(quarterSize, add(from)({row: quarterSize, col: quarterSize}));
             cache.set(cacheKey, powerLevel);
             return powerLevel;
         }
         const smallerSize = size - 1;
-        let powerLevel = helper(smallerSize, from);
+        let powerLevel = divideConquer(smallerSize, from);
         // add bottom row
         for (let i = 0; i < size; i++)
             powerLevel += cache.get(`${toKey(add(from)({row: smallerSize, col: i}))},1`)!;
@@ -64,11 +63,11 @@ export const getLargestPowerAndSize2 = (serial: number) => {
     let maxPower = 0;
     let maxPowerStart = {row: 0, col: 0};
     let maxPowerSize = 300;
-    for (let s = 1; s <= 300; s++) {
+    for (let s = 2; s <= 300; s++) {
         let maxPowerForSize = 0;
         for (let i = 1; i <= maxSide - s + 1; i++) {
             for (let j = 1; j <= maxSide - s + 1; j++) {
-                const powerLevel = helper(s, {row: i, col: j});
+                const powerLevel = divideConquer(s, {row: i, col: j});
                 if (powerLevel > maxPower) {
                     maxPower = powerLevel;
                     maxPowerStart = {row: i, col: j};
