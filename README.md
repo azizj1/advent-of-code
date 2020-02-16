@@ -5,7 +5,7 @@ My solutions to [Advent of Code](https://adventofcode.com/) problems.
 1. Install dependencies via `yarn install`.
 2. Two options:
     1. Run and watch a single file via `yarn watch-single`, or
-    2. Run and watch the last file changed via `yarn start`.
+    2. Run and watch the last file changed under a [specific year](src/watch-last-changed.ts) via `yarn start`.
 ## 2019
 All problems are complete, but only some are worthy of notes:
 
