@@ -7,6 +7,8 @@ const { spawn } = require('child_process');
 const BUILD_DIR = path.join(__dirname, 'build');
 const STATS = 'errors-warnings';
 
+// webpack watch will only build files after it detects a change
+// you have to build something to actually run your code after webpack is done
 const shellPlugin = {
     apply: (compiler) => {
         compiler.hooks.afterEmit.tap('AfterEmitPlugin', () => {
@@ -22,11 +24,14 @@ class Logger {
     warn(...args) {
         console.warn(...args);
     };
+    // we silent console.info because ForkTsCheckerWebpackPlugin has an annoying
+    // console.info every time files change
     info() {}
 }
 
 module.exports = function (env) {
-    const DEBUG = env !== 'prod' && env !== 'dev';
+    const entryFile = env.entry || 'watch-single';
+    const DEBUG = env.stage !== 'prod' && env.stage !== 'dev';
     const BABEL_CONFIG = {
         babelrc: false,
         presets: [
@@ -41,9 +46,6 @@ module.exports = function (env) {
         ],
         cacheDirectory: DEBUG 
     };
-    const GLOBALS = {
-        'process.env.NODE_ENV': JSON.stringify(DEBUG ? 'local' : env === 'prod' ? 'production' : 'development')
-    };
 
     const config = {
         mode: DEBUG ? 'development' : 'production',
@@ -52,7 +54,7 @@ module.exports = function (env) {
             __dirname: false
         },
         entry: DEBUG ?
-            { 'watch': './src/watch.ts' } :
+            { 'watch': `./src/${entryFile}.ts` } :
             { 'run': './src/run.ts' }
         ,
         output: {
@@ -85,9 +87,8 @@ module.exports = function (env) {
             }]
         },
         plugins: [
-            new webpack.DefinePlugin(GLOBALS),
             new ForkTsCheckerWebpackPlugin({ eslint: true, logger: new Logger() }),
-            ... DEBUG ? [shellPlugin] : [
+            ...DEBUG ? [shellPlugin] : [
                 new CleanPlugin([BUILD_DIR])
             ]
         ],

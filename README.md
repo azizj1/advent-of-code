@@ -1,7 +1,13 @@
 # Advent of Code Solutions
+My solutions to [Advent of Code](https://adventofcode.com/) problems.
 
+#### Quick Start
+1. Install dependencies via `yarn install`.
+2. Two options:
+    1. Run and watch a single file via `yarn watch-single`, or
+    2. Run and watch the last file changed via `yarn start`.
 ## 2019
-All problems are complete, but only some were worthy of notes:
+All problems are complete, but only some are worthy of notes:
 
 * [Day 2b - System of Equations](src/2019/2b.md)
 * [Day 12b - N-Body Problem](src/2019/12b.md)

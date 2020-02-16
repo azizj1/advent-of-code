@@ -4,8 +4,9 @@
   "description": "Solutions for https://adventofcode.com/",
   "main": "index.js",
   "scripts": {
-    "watch": "webpack --watch",
-    "start": "webpack --watch"
+    "watch": "webpack --watch --env.entry=watch-last-changed",
+    "watch-single": "webpack --watch --env.entry=watch-single",
+    "start": "webpack --watch  --env.entry=watch-last-changed"
   },
   "repository": {
     "type": "git",
