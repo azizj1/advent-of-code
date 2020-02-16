@@ -50,3 +50,4 @@ All problems are complete, but only some are worthy of notes:
     * N-ary Tree class
 * [Day 11 - Summed Area Table](src/2018/11.md)
     * Summed Area Table
+    * Largest divisor of a number
