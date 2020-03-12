@@ -51,3 +51,4 @@ All problems are complete, but only some are worthy of notes:
 * [Day 11 - Summed Area Table](src/2018/11.md)
     * Summed Area Table
     * Largest divisor of a number
+* [Day 12](src/2018/12.md)

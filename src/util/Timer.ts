@@ -49,6 +49,15 @@ export default class Timer {
     reset() {
         this.startTime = [0, 0];
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    run<E extends { toString(): string }>(body: (...inputs: any[]) => any, title?: E, ...inputs: any[]) {
+        console.log(this.start(title?.toString()));
+        const output = body(...inputs);
+        if (output != null)
+            console.log(output);
+        console.log(this.stop());
+    }
 }
 
 export const timer = new Timer();
