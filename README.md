@@ -52,3 +52,4 @@ All problems are complete, but only some are worthy of notes:
     * Summed Area Table
     * Largest divisor of a number
 * [Day 12](src/2018/12.md)
+    * Linear Regression
