@@ -57,22 +57,28 @@ const toNextGeneration = (s: ISimulation) => {
     };
 };
 
+const getScore = (s: ISimulation) =>
+    s.initial.reduce((sc, p, i) => sc + (p === '#' ? (s.startAt + i) : 0), 0);
+
 const afterNGenerations = (s: ISimulation, n: number) => {
     let generation = s;
-    for (let i = 0; i < n; i++)
+    for (let i = 0; i < n; i++) {
+        console.log('score', getScore(generation));
         generation = toNextGeneration(generation);
+    }
+    console.log('score', getScore(generation));
     return generation;
 };
 
 const print = (s: ISimulation) => {
-    const lastSim = afterNGenerations(s, 50000000000);
-    console.log('last set of plants', lastSim.initial.join(''));
+    const lastSim = afterNGenerations(s, 20);
+    console.log(lastSim.initial.join(''));
     console.log(lastSim.startAt);
-    const score = lastSim.initial.reduce((s, p, i) => s + (p === '#' ? (lastSim.startAt + i) : 0), 0);
+    const score = getScore(s);
     console.log(score);
 };
 
 export const run = () => {
-    for (const s of getSimulations())
+    for (const s of getSimulations().slice(0, 1))
         timer.run(print, s.initial.join(''), s);
 };
