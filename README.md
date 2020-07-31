@@ -48,6 +48,8 @@ All problems are complete, but only some are worthy of notes:
     * Tree `toString()` explained
 * [Day 8b - Tree](src/2018/8b.md)
     * N-ary Tree class
+* [Day 10a - N-body Problem with Letters](src/2018/10.md)
+    * Linearity of N-body problems
 * [Day 11 - Summed Area Table](src/2018/11.md)
     * Summed Area Table
     * Largest divisor of a number
