@@ -55,3 +55,5 @@ All problems are complete, but only some are worthy of notes:
     * Largest divisor of a number
 * [Day 12](src/2018/12.md)
     * Linear Regression
+* [Day 13](src/2018/13.md)
+    * Rotation and Reflection Matrices

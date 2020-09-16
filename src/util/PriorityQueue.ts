@@ -118,6 +118,12 @@ export class PriorityQueue<T> {
         return this.heap.slice(1).map(v => v!.val);
     }
 
+    remove(item: T) {
+        const priority = this.prioritizer(item);
+        this.heap = this.heap.filter(i => priority !== i?.priority) as [null, ...Array<Node<T>>];
+        this.heapify();
+    }
+
     // O(N) - see CLRS book.
     heapify() {
         const n = this.heap.length;
