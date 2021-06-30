@@ -1,7 +1,8 @@
 import * as chalk from 'chalk';
 
 export default class Timer {
-    private startTime: [number, number]; // [seconds, nanoseconds] so if execution took 4s1ms, it'd be [4, 1000000]
+    // [seconds, nanoseconds] so if execution took 4s1ms, it'd be [4, 1000000]
+    private startTime: [number, number];
     private title: string | null;
     private withColor: boolean;
 
@@ -12,17 +13,16 @@ export default class Timer {
     }
 
     start(title?: string) {
-        if (title != null)
-            this.title = title;
+        if (title != null) this.title = title;
         let returnString = '';
         if (this.withColor) {
             returnString = chalk.default.green('Timer started');
             if (title != null)
-                returnString = chalk.default.green('Timer for ') +
+                returnString =
+                    chalk.default.green('Timer for ') +
                     chalk.default.blue(title || '') +
                     chalk.default.green(' started');
-        }
-        else {
+        } else {
             returnString = this.title == null ? 'Timer started' : `Timer for ${this.title} started`;
         }
         this.startTime = process.hrtime();
@@ -36,12 +36,18 @@ export default class Timer {
 
         if (this.withColor) {
             if (this.title == null)
-                return chalk.default.yellow('Execution time: ') +
-                    chalk.default.yellow.bold(time) + '\n';
-            return chalk.default.yellow('Execution time for ') +
+                return (
+                    chalk.default.yellow('Execution time: ') +
+                    chalk.default.yellow.bold(time) +
+                    '\n'
+                );
+            return (
+                chalk.default.yellow('Execution time for ') +
                 chalk.default.blue(this.title) +
                 chalk.default.yellow(': ') +
-                chalk.default.yellow.bold(time) + '\n';
+                chalk.default.yellow.bold(time) +
+                '\n'
+            );
         }
         return `Execution time${this.title == null ? '' : ' for ' + this.title}: ${time}\n`;
     }
@@ -50,12 +56,17 @@ export default class Timer {
         this.startTime = [0, 0];
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    run<E extends { toString(): string }>(body: (...inputs: any[]) => any, title?: E, ...inputs: any[]) {
+    // run with a timer.
+    run<E extends { toString(): string }, T extends readonly unknown[], R>(
+        body: (...inputs: T) => R,
+        title?: E,
+        ...inputs: T
+    ) {
         console.log(this.start(title?.toString()));
         const output = body(...inputs);
-        if (output != null)
+        if (output != null) {
             console.log(output);
+        }
         console.log(this.stop());
     }
 }
