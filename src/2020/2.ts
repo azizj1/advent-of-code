@@ -44,8 +44,8 @@ function isValid(rule: PasswordRule) {
 }
 
 function isValid2b({ password, letter, min, max }: PasswordRule) {
-  // exactly one, so we use exclusive or (^).
-  return (password[min - 1] === letter) ^ (password[max - 1] === letter);
+  // exactly one, so we use exclusive or (^), which is same as !==.
+  return (password[min - 1] === letter) !== (password[max - 1] === letter);
 }
 
 function getValidCount(validator: (rule: PasswordRule) => boolean) {
