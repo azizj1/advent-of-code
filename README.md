@@ -13,7 +13,7 @@ My solutions to [Advent of Code](https://adventofcode.com/) problems.
 
 Work in progress.
 
-- [Day 4b - Rule Engine](src/2020/4b.md)
+- [Day 4b - Rules Design Pattern](src/2020/4b.md)
 
 ## 2019
 
