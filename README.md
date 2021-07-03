@@ -15,6 +15,8 @@ Work in progress.
 
 - [Day 4b - Rule Engine](src/2020/4b.md)
 
+* [Day 5a - Binary Everywhere](src/2020/5.md)
+
 ## 2019
 
 All problems are complete, but only some are worthy of notes:
