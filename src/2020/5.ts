@@ -34,7 +34,7 @@ function makeGetCloser(direction: 'row' | 'col') {
   };
 }
 
-function toSeatId(boardingPass: string) {
+export function toSeatId(boardingPass: string) {
   let minR = 0,
     maxR = 127,
     minC = 0,
