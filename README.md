@@ -16,7 +16,9 @@ Work in progress.
 - [Day 4b - Rules Design Pattern](src/2020/4b.md)
 - [Day 5a - Binary Everywhere](src/2020/5.md)
 - [Day 6b - Custom Customs](src/2020/6.md)
-  - Intersection of N arrays with unique values
+  - Intersection of N arrays with unique values.
+- [Day 7 - Recursive Hand Bags](src/2020/7.md)
+  - DFS on weighted graphs.
 
 ## 2019
 
