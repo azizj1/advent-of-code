@@ -2,6 +2,13 @@ export interface IPrintable {
   toString(): string;
 }
 
+export function defaultToString<E>(w: E | undefined) {
+  if (typeof (w as any)?.toString === 'function') {
+    return (w as any).toString();
+  }
+  return '';
+}
+
 export class WGraph<T extends IPrintable, E> {
   private _vertices: Set<T>;
   private edges: Map<T, Set<T>>;
@@ -51,12 +58,14 @@ export class WGraph<T extends IPrintable, E> {
       );
   }
 
-  toString(wToString?: (w: E | undefined) => string) {
+  toString(wToString?: (w: E | undefined) => string, useDefault = false) {
+    const toStringFunc =
+      wToString != null ? wToString : useDefault ? defaultToString : undefined;
     let str = '';
-    if (wToString != null) {
+    if (toStringFunc != null) {
       for (const [key, val] of this.edges.entries())
         str += `${key} -> ${Array.from(val)
-          .map((v) => `${wToString(this.getWeight(key, v))} ${v}`)
+          .map((v) => `${toStringFunc(this.getWeight(key, v))} ${v}`)
           .join(', ')}\n`;
     } else {
       for (const [key, val] of this.edges.entries())
