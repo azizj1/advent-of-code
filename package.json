@@ -6,7 +6,8 @@
   "scripts": {
     "watch": "webpack --watch --env.entry=watch-last-changed",
     "watch-single": "webpack --watch --env.entry=watch-single",
-    "start": "webpack --watch  --env.entry=watch-last-changed"
+    "start": "webpack --watch  --env.entry=watch-last-changed",
+    "test": "webpack --watch --env.entry=test"
   },
   "repository": {
     "type": "git",
