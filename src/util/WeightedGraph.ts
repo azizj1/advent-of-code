@@ -3,9 +3,11 @@ export interface IPrintable {
 }
 
 export function defaultToString<E>(w: E | undefined) {
+  /* eslint-disable */
   if (typeof (w as any)?.toString === 'function') {
     return (w as any).toString();
   }
+  /* eslint-enable */
   return '';
 }
 
