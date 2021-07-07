@@ -19,6 +19,8 @@ Work in progress.
   - Intersection of N arrays with unique values.
 - [Day 7 - Recursive Hand Bags](src/2020/7.md)
   - DFS on weighted graphs.
+- [Day 9b - Encoding Error](src/2020/9b.md)
+  - Efficient continguous sum.
 
 ## 2019
 

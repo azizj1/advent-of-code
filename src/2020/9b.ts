@@ -15,6 +15,8 @@ function toPartBSimulation(sim: Simulation): SimulationPartB {
 }
 
 function findContiguousSum({ sumTo, xmasData }: SimulationPartB): number[] {
+  // we don't need to iterate through the entire xmasData, just until the index
+  // where the invalidNumber (or sumTo) is.
   const idx = assert(
     xmasData.findIndex((d) => d === sumTo),
     (idx) => idx > -1
