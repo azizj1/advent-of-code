@@ -1,3 +1,9 @@
+/**
+ * Supports bidirectional O(1) access to both key and values.
+ * Only unique pairs are allowed. E.g., if you add (1, 3) and later tried to add
+ * it again, it would do nothing. You could, however, add (4, 3) or (1, 2)
+ * without a problem.
+ */
 export class BiMap<K, V> {
   private readonly keyMap = new Map<K, V[]>();
   private readonly valMap = new Map<V, K[]>();
