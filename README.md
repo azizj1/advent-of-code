@@ -22,6 +22,8 @@ Work in progress.
 - [Day 9b - Encoding Error](src/2020/9b.md)
   - Efficient continguous sum
   - 1D version of [Summed Area Tables](src/2018/11.md)
+- [Day 10b - Adapter Array](src/2020/10b.md)
+  - DP problem
 
 ## 2019
 

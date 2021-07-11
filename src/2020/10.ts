@@ -2,12 +2,12 @@ import { timer } from '~/util/Timer';
 import { getRunsFromIniNewlineSep, pipe } from '~/util/util';
 import input from './10.txt';
 
-interface Simulation {
+export interface Simulation {
   name: string;
   adapters: number[];
 }
 
-function getSimulations(): Simulation[] {
+export function getSimulations(): Simulation[] {
   return getRunsFromIniNewlineSep(input).map((sim) => ({
     name: sim.name,
     adapters: sim.content.map(Number),
