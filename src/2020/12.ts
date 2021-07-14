@@ -74,12 +74,15 @@ function execute({ instructions }: Simulation): [number, number] {
 
 function executeB({ instructions }: Simulation): [number, number] {
   let location: [number, number] = [0, 0];
-  let direction: [number, number] = [10, 1];
+  let direction: [number, number] = [10, 1]; // diff initial vector.
 
   for (const { action, value } of instructions) {
     const [x, y] = location;
     if (dirVectors.has(action as Direction)) {
       const [dx, dy] = dirVectors.get(action as Direction)!;
+      // this is the only thing that's different between part A and B.
+      // In part B, the direction changes. In part A, the ship's location
+      // changes.
       direction = [direction[0] + dx * value, direction[1] + dy * value];
     } else if (action === 'F') {
       const [dx, dy] = direction;
