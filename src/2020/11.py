@@ -4,6 +4,10 @@ from scipy.ndimage import convolve
 with open("11py.txt") as f:
     rows = []
     for x in f:
+        # since we know that the input just has Ls and floors,
+        # we don't have to worry about parsing # (occupied seats).
+        # The below will create a grid of True (valid seat) or False (floor, not
+        # valid). We'll convert this to 1s and 0s later.
         rows.append([c == "L" for c in x.strip()])
 
 grid = np.array(rows).astype(np.int8)

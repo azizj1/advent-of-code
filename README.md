@@ -24,14 +24,10 @@ Work in progress.
   - 1D version of [Summed Area Tables](src/2018/11.md)
 - [Day 10b - Adapter Array](src/2020/10b.md)
   - DP problem
-<<<<<<< HEAD
-  - Pigeonhole principle
+  - Pigeonhole principle / counting
 - [Day 11 - Seating System](src/2020/11.md)
   - Immutable object
   - 2D Convolution
-=======
-  - Pigeonhole principle / counting
->>>>>>> f37a75cdabe9a5589877365fc8c4d5bf926e7597
 
 ## 2019
 
