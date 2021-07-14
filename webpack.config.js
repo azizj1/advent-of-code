@@ -10,91 +10,95 @@ const STATS = 'errors-warnings';
 // webpack watch will only build files after it detects a change
 // you have to build something to actually run your code after webpack is done
 const shellPlugin = {
-    apply: (compiler) => {
-        compiler.hooks.afterEmit.tap('AfterEmitPlugin', () => {
-            spawn('node', ['build/watch.js'], {shell: true, stdio: 'inherit' });
-          });
-    }
+  apply: (compiler) => {
+    compiler.hooks.afterEmit.tap('AfterEmitPlugin', () => {
+      spawn('node', ['build/watch.js'], { shell: true, stdio: 'inherit' });
+    });
+  },
 };
 
 class Logger {
-    error(...args) {
-        console.error(...args);
-    };
-    warn(...args) {
-        console.warn(...args);
-    };
-    // we silent console.info because ForkTsCheckerWebpackPlugin has an annoying
-    // console.info every time files change
-    info() {}
+  error(...args) {
+    console.error(...args);
+  }
+  warn(...args) {
+    console.warn(...args);
+  }
+  // we silent console.info because ForkTsCheckerWebpackPlugin has an annoying
+  // console.info every time files change
+  info() {}
 }
 
 module.exports = function (env) {
-    const entryFile = env.entry || 'watch-single';
-    const DEBUG = env.stage !== 'prod' && env.stage !== 'dev';
-    const BABEL_CONFIG = {
-        babelrc: false,
-        presets: [
-            ['@babel/env', { 'targets': { 'node': 'current' } }],
-            ['@babel/typescript']],
-        plugins: [
-            '@babel/plugin-proposal-class-properties',
-            '@babel/plugin-proposal-object-rest-spread',
-            '@babel/plugin-proposal-numeric-separator',
-            '@babel/plugin-syntax-bigint',
-            'lodash'
-        ],
-        cacheDirectory: DEBUG 
-    };
+  const entryFile = env.entry || 'watch-single';
+  const DEBUG = env.stage !== 'prod' && env.stage !== 'dev';
+  const BABEL_CONFIG = {
+    babelrc: false,
+    presets: [
+      ['@babel/env', { targets: { node: 'current' } }],
+      ['@babel/typescript'],
+    ],
+    plugins: [
+      '@babel/plugin-proposal-class-properties',
+      '@babel/plugin-proposal-object-rest-spread',
+      '@babel/plugin-proposal-numeric-separator',
+      '@babel/plugin-syntax-bigint',
+      'lodash',
+    ],
+    cacheDirectory: DEBUG,
+  };
 
-    const config = {
-        mode: DEBUG ? 'development' : 'production',
-        target: 'node',
-        node: {
-            __dirname: false
-        },
-        entry: DEBUG ?
-            { 'watch': `./src/${entryFile}.ts` } :
-            { 'run': './src/run.ts' }
-        ,
-        output: {
-            path: BUILD_DIR,
-            filename: '[name].js',
-            chunkFilename: '[name].bundle.js',
-            publicPath: '/',
-            ... DEBUG ? {} : {
-                libraryTarget: 'commonjs2'
-            }
-        },
-        resolve: {
-            alias: {
-                '~': path.join(__dirname, 'src')
+  const config = {
+    mode: DEBUG ? 'development' : 'production',
+    target: 'node',
+    node: {
+      __dirname: false,
+    },
+    entry: DEBUG ? { watch: `./src/${entryFile}.ts` } : { run: './src/run.ts' },
+    output: {
+      path: BUILD_DIR,
+      filename: '[name].js',
+      chunkFilename: '[name].bundle.js',
+      publicPath: '/',
+      ...(DEBUG
+        ? {}
+        : {
+            libraryTarget: 'commonjs2',
+          }),
+    },
+    devtool: 'inline-source-map',
+    resolve: {
+      alias: {
+        '~': path.join(__dirname, 'src'),
+      },
+      extensions: ['*', '.tsx', '.ts', '.jsx', '.js', '.json'],
+    },
+    module: {
+      rules: [
+        {
+          test: /\.tsx?$/i,
+          exclude: [/node_modules/, path.join(__dirname, 'vendor')],
+          use: [
+            {
+              loader: 'babel-loader',
+              options: BABEL_CONFIG,
             },
-            extensions: ['*', '.tsx', '.ts', '.jsx', '.js', '.json']
+          ],
         },
-        module: {
-            rules: [{
-                test: /\.tsx?$/i,
-                exclude: [/node_modules/, path.join(__dirname, 'vendor')],
-                use: [{
-                    loader: 'babel-loader',
-                    options: BABEL_CONFIG
-                }]
-            }, {
-                test: /\.txt$/i,
-                exclude: [/node_modules/, path.join(__dirname, 'vendor')],
-                use: 'raw-loader'
-            }]
+        {
+          test: /\.txt$/i,
+          exclude: [/node_modules/, path.join(__dirname, 'vendor')],
+          use: 'raw-loader',
         },
-        plugins: [
-            new ForkTsCheckerWebpackPlugin({ eslint: true, logger: new Logger() }),
-            ...DEBUG ? [shellPlugin] : [
-                new CleanPlugin([BUILD_DIR])
-            ]
-        ],
-        cache: DEBUG,
-        stats: STATS
-    };
+      ],
+    },
+    plugins: [
+      new ForkTsCheckerWebpackPlugin({ eslint: true, logger: new Logger() }),
+      ...(DEBUG ? [shellPlugin] : [new CleanPlugin([BUILD_DIR])]),
+    ],
+    cache: DEBUG,
+    stats: STATS,
+  };
 
-    return config;
-}
+  return config;
+};
