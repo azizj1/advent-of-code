@@ -28,6 +28,8 @@ Work in progress.
 - [Day 11 - Seating System](src/2020/11.md)
   - Immutable object
   - 2D Convolution
+- [Day 13 - Shuttle Search](src/2020/13b.md)
+  - Fun with prime numbers.
 
 ## 2019
 
