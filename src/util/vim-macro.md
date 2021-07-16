@@ -8,6 +8,11 @@ file boilerplate. E.g.,
 iimport { timer } from '~/util/Timer';import { getRunsFromIniNewlineSep } from '~/util/util';import input from './=expand('%:t:r').txt';interface Simulation {name: string;}function getSimulations(): Simulation[] {throw new Error('Not implemented.');}export function run() {const sim = getSimulations()[0];timer.run(() => void 0, `day =expand('%:t:r') - ${sim.name}`, sim);}ii
 ```
 
+Useful for part 2:
+```
+iimport {timer} from '~/util/Timer';import {Simulation, getSimulations} from './=trim(expand('%:t:r'), 'ab')';export function run() {const sim = getSimulations()[0];timer.run(() => void 0, `day =expand('%:t:r') - ${sim.name}`, sim);}ii
+```
+
 When modifying this file, make sure to first do
 
 ```
