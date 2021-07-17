@@ -9,12 +9,12 @@ export const first = <T>(arr: T[]) => arr[0];
 // Reason we use RegExp instead of /expression/gs because we want to multiline
 // our regex to add comments.
 const INI_FILE_REGEX = new RegExp(
-  '\\[([^\\]]+)\\]\\r?\\n?' + // the header of file. E.g., [input]
-    '((?:(?:[A-Za-z]+=[\\w /]+)\\r?\\n?)*)' + // any properties separated by newline. x=4\ny=3
+  '\\[([^\\]]+)\\]\\r?\\n' + // the header of file. E.g., [input]
+    '((?:(?:[A-Za-z]+=[\\w /]+)\\r?\\n)*)' + // any properties separated by newline. x=4\ny=3
     '(.+?' + // the rest of the content.
     // positive lookahead. The match must either end in EOF ($), or 0+ newlines
     // followed by [, indicating start of another ini match.
-    '(?=((\\r?\\n?)*\\[|$)))',
+    '(?=((\\r?\\n)+\\[|$)))',
   'gs' // flags. 'g' don't stop after first match, and 's' dot matches newline.
 );
 export const getRunsFromIniFile = (content: string) =>

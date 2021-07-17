@@ -11,12 +11,12 @@ export function assert<T>(
   val: T,
   conditionOrMsg?: ((val: T) => boolean) | boolean | string,
   message?: string
-): T {
+): NonNullable<T> {
   if (conditionOrMsg === undefined || typeof conditionOrMsg === 'string') {
     if (!val) {
       throw new AssertionError(`AssertionError: ${conditionOrMsg ?? message}`);
     } else {
-      return val;
+      return val!;
     }
   } else if (
     typeof conditionOrMsg === 'function' &&
@@ -29,5 +29,5 @@ export function assert<T>(
   ) {
     throw new AssertionError(`AssertionError: ${message}`);
   }
-  return val;
+  return val!;
 }
