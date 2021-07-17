@@ -1,3 +1,13 @@
+/**
+ * This problem was not fun to do in Javascript. None of the bit-wise operations
+ * work after 32 bits. E.g., (1 << 33) doesn't return what you'd expect, and 1 |
+ * 68719476736 also doesn't return what you'd expect (68719476736 is 2^36, so 36
+ * bits).
+ * I had to do a lot of bit manipulation myself, which meant converting a number
+ * to its bit array via [...someNumber.toString(2)], and then mutating that
+ * array to update the right bit, and then finally doing
+ * parseInt(bitArrayMutated, 2).
+ */
 import { assert } from '~/util/assert';
 import { timer } from '~/util/Timer';
 import { getRunsFromIniNewlineSep, pipe } from '~/util/util';

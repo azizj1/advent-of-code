@@ -1,3 +1,13 @@
+/**
+ * This problem was not fun to do in Javascript. None of the bit-wise operations
+ * work after 32 bits. E.g., (1 << 33) doesn't return what you'd expect, and 1 |
+ * 68719476736 also doesn't return what you'd expect (68719476736 is 2^36, so 36
+ * bits).
+ * I had to do a lot of bit manipulation myself, which meant converting a number
+ * to its bit array via [...someNumber.toString(2)], and then mutating that
+ * array to update the right bit, and then finally doing
+ * parseInt(bitArrayMutated, 2).
+ */
 import { assert } from '~/util/assert';
 import { timer } from '~/util/Timer';
 import { declareProblem, getRunsFromIniNewlineSep, pipe } from '~/util/util';
@@ -10,7 +20,7 @@ interface Mask {
 
 interface Instruction {
   address: number;
-  value: bigint;
+  value: number;
   mask: Mask;
 }
 
@@ -26,7 +36,7 @@ function parseAddress(ins: string) {
   );
   return {
     address: Number(matches[1]),
-    value: BigInt(matches[2]),
+    value: Number(matches[2]),
   };
 }
 
@@ -66,22 +76,25 @@ function getSimulations(): Simulation[] {
 function setBit(num: number, bit: number) {
   const numBits = [...num.toString(2)];
   while (numBits.length <= bit) {
-    numBits.push('0');
+    numBits.unshift('0');
   }
+  // If we wan to set the 30th bit, we don't do numBits[30] (which may not even
+  // exist). We need the 30th bit from the BACK of the array. We do the
+  // unshifting above to make sure that bit does exist.
   numBits[numBits.length - 1 - bit] = '1';
   return parseInt(numBits.join(''), 2);
 }
 
 function initializeProgram({ instructions }: Simulation) {
-  const memory = new Map<number, bigint>();
-  const writeToMemory = (address: number, value: bigint) => {
+  const memory = new Map<number, number>();
+  const writeToMemory = (address: number, value: number) => {
     memory.set(address, value);
   };
   const helper = (
     address: number,
     floatersAt: number[],
     floaterIdx: number,
-    value: bigint
+    value: number
   ) => {
     if (floaterIdx === floatersAt.length) {
       writeToMemory(address, value);
@@ -92,15 +105,37 @@ function initializeProgram({ instructions }: Simulation) {
     helper(setBit(address, bitIdx), floatersAt, floaterIdx + 1, value);
   };
   for (const { address, value, mask } of instructions) {
-    let addressOr = address | mask.or;
-    let addressArray = [...addressOr.toString(2)];
+    const orArray = [...mask.or.toString(2)];
+    const addressArray = [...address.toString(2)];
+    for (let i = 0; i < orArray.length; i++) {
+      if (orArray[i] === '1') {
+        // if the index 0 is set to '1', the bit we're trying to set depends on
+        // the length of the orArray. If it has a length of 4, then we're
+        // setting the 2^3 bit. We need to know what bit we're setting.
+        const orBit = orArray.length - 1 - i;
+        // if we're setting the 30th bit, but address is just the number 64, we
+        // need to add lots of zeros in front.
+        while (addressArray.length <= orBit) {
+          addressArray.unshift('0');
+        }
+        // Again, if we're setting the 3rd bit, it's not addressArray[3], since
+        // the binary to string is backwards. addressArray[3] would correspond
+        // to the 4th last bit. If the Array is
+        // 011101110011010101000001
+        //                     ^
+        //                    bit
+        // which has an index of addressArray.length - 1 - bit
+        addressArray[addressArray.length - 1 - orBit] = '1';
+      }
+    }
     for (const floaterIdx of mask.floatersAt) {
       if (floaterIdx < addressArray.length) {
+        // we do this subtraction math to deal with the reverse string
+        // representation of the toString(2).
         addressArray[addressArray.length - 1 - floaterIdx] = '0';
       }
     }
-    addressOr = parseInt(addressArray.join(''), 2);
-    helper(addressOr, mask.floatersAt, 0, value);
+    helper(parseInt(addressArray.join(''), 2), mask.floatersAt, 0, value);
   }
   return memory;
 }
