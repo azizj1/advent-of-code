@@ -1,5 +1,5 @@
 export class AssertionError extends Error {
-  constructor(message: string) {
+  constructor(message?: string) {
     super(message);
     // restore prototype chain
     Object.setPrototypeOf(this, new.target.prototype);
@@ -9,25 +9,25 @@ export class AssertionError extends Error {
 
 export function assert<T>(
   val: T,
-  conditionOrMsg?: ((val: T) => boolean) | boolean | string,
+  conditionOrMsg?: ((val: NonNullable<T>) => boolean) | boolean | string,
   message?: string
 ): NonNullable<T> {
   if (conditionOrMsg === undefined || typeof conditionOrMsg === 'string') {
     if (!val) {
-      throw new AssertionError(`AssertionError: ${conditionOrMsg ?? message}`);
+      throw new AssertionError(conditionOrMsg ?? message);
     } else {
       return val!;
     }
   } else if (
     typeof conditionOrMsg === 'function' &&
-    (val == null || !conditionOrMsg(val))
+    (val == null || !conditionOrMsg(val!))
   ) {
-    throw new AssertionError(`AssertionError: ${message}`);
+    throw new AssertionError(message);
   } else if (
     typeof conditionOrMsg === 'boolean' &&
     (val == null || !conditionOrMsg)
   ) {
-    throw new AssertionError(`AssertionError: ${message}`);
+    throw new AssertionError(message);
   }
   return val!;
 }
