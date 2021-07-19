@@ -9,7 +9,7 @@ import { Simulation, getSimulations, Ticket, Range } from './16';
  * A rule like `row: 5-7 or 9-11` would have at least 'row' in index 5, 6, 7, 9,
  * 10, and 11.
  */
-function buildInvertedIndex(validRanges: Range[]) {
+function buildInvertedIndex(validRanges: Range[]): Set<string>[] {
   // maps a number to the set of possible field names
   const index: Set<string>[] = [];
   for (const { name, start, end } of validRanges) {
@@ -26,17 +26,21 @@ function buildInvertedIndex(validRanges: Range[]) {
 function removeInvalidTickets(
   nearbyTickets: Ticket[],
   invertedIndex: Set<string>[]
-) {
+): Ticket[] {
   return nearbyTickets.filter((ticket) =>
     ticket.every((field) => invertedIndex[field] != null)
   );
 }
 
+/**
+ * For each column (given by the index of the array), provide a set of possible
+ * field names.
+ */
 function classifyVectorColumns(
   nearbyTickets: Ticket[],
   ticket: Ticket,
   invertedIndex: Set<string>[]
-) {
+): Set<string>[] {
   const validTickets = [
     ticket,
     ...removeInvalidTickets(nearbyTickets, invertedIndex),
@@ -51,7 +55,10 @@ function classifyVectorColumns(
   return classifiedVectorColumns;
 }
 
-function getFieldsName({ validRanges, nearbyTickets, ticket }: Simulation) {
+function getFieldsName({ validRanges, nearbyTickets, ticket }: Simulation): {
+  nameToColumnIdx: Map<string, number>;
+  ticket: Ticket;
+} {
   // for every single numerical value, what are the possible field names?
   const index = buildInvertedIndex(validRanges);
   const classifiedVectorColumns = classifyVectorColumns(
@@ -88,7 +95,7 @@ function multiply({
 }: {
   nameToColumnIdx: Map<string, number>;
   ticket: Ticket;
-}) {
+}): number {
   let result = 1;
   for (const [name, columnIdx] of nameToColumnIdx) {
     if (name.indexOf('departure ') === 0) {
