@@ -30,6 +30,8 @@ Work in progress.
   - 2D Convolution
 - [Day 13 - Shuttle Search](src/2020/13b.md)
   - Fun with prime numbers.
+- [Day 16 - Ticket Translation](src/2020/16.md)
+  - Constraint satisfaction problem (CSP)
 
 ## 2019
 
