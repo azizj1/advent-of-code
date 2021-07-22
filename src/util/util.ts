@@ -1,3 +1,4 @@
+import { assert } from './assert';
 import chalk from 'chalk';
 
 export const last = <T>(arr: T[]) => arr[arr.length - 1];
@@ -83,4 +84,60 @@ export function pipe<T extends unknown[], V>(
     const firstValue = args[0](...inputs);
     return args.slice(1).reduce((val, func) => func(val), firstValue);
   };
+}
+
+/**
+ * An input of ([-1, 0], 3) would return 2^3 = 8 results of length 3. Some
+ * permutations include: [-1, -1, -1], [-1, -1, 0], [-1, 0, -1], etc.
+ * @param fromSet the numbers you want to permute.
+ * @param length How long each result should be.
+ * @return An array of permutations of length given by fromSet.length ^ length,
+ * where each permutation is of length `lenth`.
+ */
+export function getPermutations(fromSet: number[], length: number): number[][] {
+  const result: number[][] = [];
+  // bactracking algorithm.
+  const helper = (workingSet: number[]) => {
+    if (workingSet.length === length) {
+      result.push([...workingSet]);
+      return;
+    }
+    for (const item of fromSet) {
+      workingSet.push(item);
+      helper(workingSet);
+      workingSet.pop();
+    }
+  };
+  helper([]);
+  return result;
+}
+
+/**
+ * Gets all possible integer vectors from startVector to endVector.
+ * E.g., [-2, 1] to [0, 2] would return things like [-2,1], [-2,2], [-1,1],
+ * [-1,2], [0,1], [0, 2].
+ * Note that your vector can be more than 2D. [-10, -5, 0, -10, 2] to [0, 0, 0,
+ * 0, 0] is valid.
+ */
+export function getSpace(startVector: number[], endVector: number[]) {
+  assert(startVector.length === endVector.length);
+  assert(endVector.every((e, idx) => e >= startVector[idx]));
+
+  const result: number[][] = [];
+  const helper = (workingVector: number[]) => {
+    if (workingVector.length === startVector.length) {
+      result.push([...workingVector]);
+      return;
+    }
+    const nextIdx = workingVector.length;
+    const start = startVector[nextIdx];
+    const end = endVector[nextIdx];
+    for (let i = start; i <= end; i++) {
+      workingVector.push(i);
+      helper(workingVector);
+      workingVector.pop();
+    }
+  };
+  helper([]);
+  return result;
 }
