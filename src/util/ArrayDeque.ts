@@ -7,6 +7,12 @@ export class ArrayDeque<T> implements Deque<T> {
   // tail is leading, so it points to the next empty space.
   private tail = 0;
 
+  constructor(initial: T[] = []) {
+    for (const item of initial) {
+      this.offerLast(item);
+    }
+  }
+
   /** @override */
   offerFirst(item: T) {
     this.head--;
@@ -82,7 +88,7 @@ export class ArrayDeque<T> implements Deque<T> {
   /** @override */
   *entries(): IterableIterator<[number, T]> {
     for (let i = this.head; i < this.tail; i++) {
-      yield [i, this.data[i]];
+      yield [i - this.head, this.data[i]];
     }
   }
 }

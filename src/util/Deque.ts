@@ -1,4 +1,4 @@
-export interface Deque<T> extends IterableIterator<T> {
+export interface Deque<T> extends Iterable<T> {
   readonly size: number;
   offerFirst(data: T): void;
   offerLast(data: T): void;
