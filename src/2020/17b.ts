@@ -1,4 +1,5 @@
 import { assert } from '~/util/assert';
+import { GenericSet } from '~/util/GenericSet';
 import { InfiniteGrid } from '~/util/InfiniteGrid';
 import { timer } from '~/util/Timer';
 import { getPermutations, getRunsFromIniNewlineSep } from '~/util/util';
@@ -62,6 +63,8 @@ class PocketDimension {
     return result;
   }
 
+  // TODO(azizj): Don't scan every point possible within the boundaries. Only
+  // scan the active points and their neighbors.
   getNextCycle(): PocketDimension {
     const newGrid = new InfiniteGrid<boolean>(4);
     for (const [vector, isActive] of this.grid.entries(true, 1)) {
@@ -77,6 +80,47 @@ class PocketDimension {
       }
     }
     return new PocketDimension(newGrid);
+  }
+
+  getNextCycle2(): PocketDimension {
+    const newGrid = new InfiniteGrid<boolean>(4);
+    const scanned = new GenericSet<number[]>((v) => v.join(','));
+    // will only scan vectors that were actually set in the InfiniteGrid.
+    for (const [vector, isActive] of this.grid.entries()) {
+      const [x, y, z, w] = vector;
+      if (isActive) {
+        this.updatePointOnNewGrid(vector, newGrid);
+        const neighbors = this.neighborsOffset.map(([xo, yo, zo, wo]) => [
+          x + xo,
+          y + yo,
+          z + zo,
+          w + wo,
+        ]);
+        // scan its neighbors too, even if they're inactive.
+        for (const neighbor of neighbors) {
+          if (!scanned.has(neighbor)) {
+            this.updatePointOnNewGrid(neighbor, newGrid);
+            scanned.add(neighbor);
+          }
+        }
+      }
+    }
+    return new PocketDimension(newGrid);
+  }
+
+  private updatePointOnNewGrid(
+    vector: number[],
+    newGrid: InfiniteGrid<boolean>
+  ) {
+    const isActive = !!this.grid.get(vector);
+    const activeNeighborCount = this.getActiveNeighborsCount(vector);
+    if (isActive) {
+      if (activeNeighborCount === 2 || activeNeighborCount === 3) {
+        newGrid.set(vector, true);
+      }
+    } else if (activeNeighborCount === 3) {
+      newGrid.set(vector, true);
+    }
   }
 
   private getActiveNeighborsCount(vector: number[]): number {
@@ -104,7 +148,7 @@ function getSimulations(): Simulation[] {
 function execute({ pocket }: Simulation, cycles: number) {
   let current = pocket;
   for (let i = 0; i < cycles; i++) {
-    current = current.getNextCycle();
+    current = current.getNextCycle2();
   }
   return current.getActiveCubeCount();
 }

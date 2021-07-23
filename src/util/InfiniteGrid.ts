@@ -33,6 +33,10 @@ export class InfiniteGrid<T> {
     return this.dimensionBoundaries.map((b) => ({ ...b }));
   }
 
+  get size() {
+    return this.vectors.size;
+  }
+
   /**
    * @param entireGrid When set, it will traverse the entire grid within the
    * boundaries of the grid. So if the grid has [-4,1], [10, 5], [6, 7], it will
