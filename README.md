@@ -32,6 +32,10 @@ Work in progress.
   - Fun with prime numbers.
 - [Day 16 - Ticket Translation](src/2020/16.md)
   - Constraint satisfaction problem (CSP)
+- [Day 17 - Conway Cube](src/2020/17.md)
+  - ArrayDeques
+  - InfiniteGrid
+  - `getPermutations` and `getSpace` backtracking solutions.
 
 ## 2019
 

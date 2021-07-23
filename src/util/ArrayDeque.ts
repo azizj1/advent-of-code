@@ -15,6 +15,8 @@ export class ArrayDeque<T> implements Deque<T> {
 
   /** @override */
   offerFirst(item: T) {
+    // When using negative numbers for keys, they act like keys in a JSON
+    // object.
     this.head--;
     this.data[this.head] = item;
   }
