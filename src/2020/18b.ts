@@ -60,7 +60,6 @@ function toPostfix(infixExpression: string): string[] {
 }
 
 function solve(postfixExpression: string[]): number {
-  // mutable
   const stack: number[] = [];
   for (const word of postfixExpression) {
     if (isOperator(word)) {

@@ -19,7 +19,7 @@ function solveAll({ mathExpressions }: Simulation) {
   return mathExpressions.map(solve).reduce((sum, curr) => curr + sum);
 }
 
-function solve(expression: string) {
+function solve(expression: string): number {
   const stack: string[] = [];
   for (const word of tokens(expression)) {
     stack.push(word);
