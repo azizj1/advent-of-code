@@ -56,7 +56,7 @@ function solve(expression: string) {
  * ")".
  */
 export function* tokens(expression: string): Generator<string> {
-  assert(expression, expression.length > 0);
+  assert(expression.length > 0);
   let remaining = expression;
   while (remaining.length > 0) {
     if (isParenthesis(remaining[0])) {
