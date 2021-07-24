@@ -36,6 +36,8 @@ Work in progress.
   - ArrayDeques
   - InfiniteGrid
   - `getPermutations` and `getSpace` backtracking solutions.
+- [Day 18 - Math Expressions](src/2020/18.md)
+  - Infix and postfix math expressions
 
 ## 2019
 
