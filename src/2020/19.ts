@@ -9,21 +9,47 @@ export interface Simulation {
   messages: string[];
 }
 
-interface RuleResponse {
-  valid: boolean;
-  // when invalid, the field below is meaningless.
-  nextStartAtIdx: number;
+export function getSimulations(): Simulation[] {
+  return getRunsFromIniNewlineSep(input).map((sim) => {
+    const rules: string[] = [];
+    const messages: string[] = [];
+    for (const line of sim.content) {
+      if (/^\d+: /.test(line)) {
+        const match = assert(line.match(/^(\d+): (.+)$/), (m) => m.length >= 3);
+        const idx = assert(Number(match[1]), (n) => !isNaN(n));
+        const rule = assert(match[2]);
+        rules[idx] = rule;
+      } else {
+        messages.push(line);
+      }
+    }
+    return {
+      name: sim.name,
+      rules,
+      messages,
+    };
+  });
 }
 
-interface Rule {
+export interface Rule {
   isValid(msg: string, startAtIdx: number): RuleResponse;
 }
 
-class AndRule implements Rule {
+export interface RuleResponse {
+  valid: boolean;
+  // When invalid, the field below is meaningless.
+  // Otherwise, it indicates to which index in the message it evaluated the
+  // rule. E.g., for AndRule, every rule in it uses the previous rule's
+  // nextStartIdx.
+  nextStartAtIdx: number;
+}
+
+export class AndRule implements Rule {
   constructor(private readonly rules: Rule[]) {}
 
   isValid(msg: string, startAtIdx: number) {
     let nextStartAtIdx = startAtIdx;
+
     for (const rule of this.rules) {
       const response = rule.isValid(msg, nextStartAtIdx);
       if (response.valid) {
@@ -35,6 +61,7 @@ class AndRule implements Rule {
         };
       }
     }
+
     return {
       valid: true,
       nextStartAtIdx,
@@ -42,7 +69,7 @@ class AndRule implements Rule {
   }
 }
 
-class OrRule implements Rule {
+export class OrRule implements Rule {
   constructor(private readonly rules: Rule[]) {}
 
   isValid(msg: string, startAtIdx: number) {
@@ -67,7 +94,7 @@ class OrRule implements Rule {
   }
 }
 
-class ExactRule implements Rule {
+export class ExactRule implements Rule {
   constructor(private readonly msg: string) {}
 
   isValid(msg: string, startAtIdx: number) {
@@ -95,29 +122,8 @@ export function buildRule(rules: string[]): Rule {
       throw new Error(`Unknown rule ${rule}.`);
     }
   };
-  return helper(rules[0]);
-}
 
-export function getSimulations(): Simulation[] {
-  return getRunsFromIniNewlineSep(input).map((sim) => {
-    const rules: string[] = [];
-    const messages: string[] = [];
-    for (const line of sim.content) {
-      if (/^\d+: /.test(line)) {
-        const match = assert(line.match(/^(\d+): (.+)$/), (m) => m.length >= 3);
-        const idx = assert(Number(match[1]), (n) => !isNaN(n));
-        const rule = assert(match[2]);
-        rules[idx] = rule;
-      } else {
-        messages.push(line);
-      }
-    }
-    return {
-      name: sim.name,
-      rules,
-      messages,
-    };
-  });
+  return helper(rules[0]);
 }
 
 function validate({ rules, messages }: Simulation) {
@@ -126,12 +132,11 @@ function validate({ rules, messages }: Simulation) {
   for (const msg of messages) {
     const response = rule.isValid(msg, 0);
     const valid = response.valid && response.nextStartAtIdx === msg.length;
-    // console.log(msg, 'is valid', valid);
     if (valid) {
       validCount++;
     }
   }
-  console.log('validCount', validCount);
+  return validCount;
 }
 
 export function run() {

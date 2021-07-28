@@ -38,6 +38,10 @@ Work in progress.
   - `getPermutations` and `getSpace` backtracking solutions.
 - [Day 18 - Math Expressions](src/2020/18.md)
   - Infix and postfix math expressions
+- [Day 19 - Grammar](src/2020/19.md)
+  - Rules design
+  - Regex subroutines
+  - CYK algorithm
 
 ## 2019
 
