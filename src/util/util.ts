@@ -1,8 +1,8 @@
 import { assert } from './assert';
 import chalk from 'chalk';
 
-export const last = <T>(arr: T[]) => arr[arr.length - 1];
-export const first = <T>(arr: T[]) => arr[0];
+export const last = <T>(arr: ArrayLike<T>) => arr[arr.length - 1];
+export const first = <T>(arr: ArrayLike<T>) => arr[0];
 
 // because we're using RegExp, one \ is not enough (which you would do
 // if you were using /expression/gs), because \ is for escaping in string.
