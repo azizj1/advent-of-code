@@ -4,12 +4,12 @@
  * it again, it would do nothing. You could, however, add (4, 3) or (1, 2)
  * without a problem.
  */
-export class BiMap<K, V> {
+export class BiMap<K, V> implements Iterable<[K, V]> {
   private readonly keyMap = new Map<K, V[]>();
   private readonly valMap = new Map<V, K[]>();
   private size_ = 0;
 
-  constructor(keyVals: [K, V][] = []) {
+  constructor(keyVals: Iterable<[K, V]> = []) {
     for (const [k, v] of keyVals) {
       this.set(k, v);
     }
@@ -99,10 +99,16 @@ export class BiMap<K, V> {
     return this.keyMap.has(key) && this.keyMap.get(key)!.includes(val);
   }
 
-  entries(): [K, V][] {
-    return Array.from(this.keyMap.entries()).flatMap(([k, vals]) =>
-      vals.map((v) => [k, v] as [K, V])
-    );
+  *[Symbol.iterator](): IterableIterator<[K, V]> {
+    yield* this.entries();
+  }
+
+  *entries(): IterableIterator<[K, V]> {
+    for (const [k, vals] of this.keyMap.entries()) {
+      for (const v of vals) {
+        yield [k, v];
+      }
+    }
   }
 
   get size() {
