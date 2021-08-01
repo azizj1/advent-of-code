@@ -31,23 +31,27 @@ export function reverse(str: string): string {
 }
 
 export class Tile {
-  private static readonly SIZE = 10;
+  readonly size: number;
+
   private grid1D: string[] = [];
   private borders_ = new Map<string, Side>();
   // if the borders need to be updated first.
   private dirty = false;
   // [xc, yc, c]. When given a coordinate like (x, y), we can get the value at
   // that component by doing x*xc + y*yc + c.
-  // Initally, the equation is idx = x + w*y, where w = 10.
+  // Initally, the equation is idx = x + w*y, where w = size of tile.
   // Allowing us to change this makes rotation a lot simipler.
   // A rotation of 90 degrees clockwise is just making this vector from [xc, yc,
   // c] to [-yc, xc, idx(0, w-1)].
-  private cordsToIdxVector = [1, Tile.SIZE, 0];
+  private cordsToIdxVector: [number, number, number];
 
   constructor(readonly id: number, grid: string[]) {
-    assert(grid.length === Tile.SIZE);
-    grid.map((r) => r.length).forEach((l) => assert(l === Tile.SIZE));
+    this.size = grid.length;
+    grid
+      .map((r) => r.length)
+      .forEach((l) => assert(l === this.size, 'Tile must be a square.'));
 
+    this.cordsToIdxVector = [1, this.size, 0];
     this.grid1D = grid.flatMap((r) => [...r]);
     this.borders_ = new Map();
     this.borders_.set(grid[0], Side.Top);
@@ -65,11 +69,23 @@ export class Tile {
   toString(withHeader = false) {
     let output = withHeader ? `Tile ${this.id}\n` : '';
 
-    for (let i = 0; i < Tile.SIZE; i++) {
-      for (let j = 0; j < Tile.SIZE; j++) {
+    for (let i = 0; i < this.size; i++) {
+      for (let j = 0; j < this.size; j++) {
         output += this.get(j, i);
       }
       output += '\n';
+    }
+    return output;
+  }
+
+  to2DArray(): string[][] {
+    const output: string[][] = [];
+    for (let i = 0; i < this.size; i++) {
+      const row: string[] = [];
+      for (let j = 0; j < this.size; j++) {
+        row.push(this.get(j, i));
+      }
+      output.push(row);
     }
     return output;
   }
@@ -93,8 +109,8 @@ export class Tile {
   }
 
   private toIndex(x: number, y: number) {
-    assert(x, x >= 0 && x < Tile.SIZE);
-    assert(y, y >= 0 && y < Tile.SIZE);
+    assert(x, x >= 0 && x < this.size);
+    assert(y, y >= 0 && y < this.size);
     const [xc, yc, c] = this.cordsToIdxVector;
     return x * xc + y * yc + c;
   }
@@ -171,11 +187,11 @@ export class Tile {
     let bottomBorder = '';
     let leftBorder = '';
 
-    for (let i = 0; i < Tile.SIZE; i++) {
+    for (let i = 0; i < this.size; i++) {
       topBorder += this.get(i, 0);
-      rightBorder += this.get(Tile.SIZE - 1, i);
-      bottomBorder += this.get(Tile.SIZE - 1 - i, Tile.SIZE - 1);
-      leftBorder += this.get(0, Tile.SIZE - 1 - i);
+      rightBorder += this.get(this.size - 1, i);
+      bottomBorder += this.get(this.size - 1 - i, this.size - 1);
+      leftBorder += this.get(0, this.size - 1 - i);
     }
 
     this.borders_.set(topBorder, Side.Top);
@@ -191,21 +207,21 @@ export class Tile {
    */
   rotate90DegreesCW() {
     const [xc, yc] = this.cordsToIdxVector;
-    const newConstant = this.toIndex(0, Tile.SIZE - 1);
+    const newConstant = this.toIndex(0, this.size - 1);
     this.cordsToIdxVector = [-yc, xc, newConstant];
     this.dirty = true;
   }
 
   private reflectOverYAxis() {
     const [xc, yc] = this.cordsToIdxVector;
-    const newConstant = this.toIndex(Tile.SIZE - 1, 0);
+    const newConstant = this.toIndex(this.size - 1, 0);
     this.cordsToIdxVector = [-xc, yc, newConstant];
     this.dirty = true;
   }
 
   private reflectOverXAxis() {
     const [xc, yc] = this.cordsToIdxVector;
-    const newConstant = this.toIndex(0, Tile.SIZE - 1);
+    const newConstant = this.toIndex(0, this.size - 1);
     this.cordsToIdxVector = [xc, -yc, newConstant];
     this.dirty = true;
   }

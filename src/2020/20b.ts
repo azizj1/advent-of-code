@@ -8,8 +8,8 @@ import {
   getSimulations,
   Borders,
   Corners,
-  addCornerTiles,
-  addBorderToTiles,
+  addCornerTilesToSim,
+  addBorderToTilesMapToSim,
 } from './20';
 import { Side, Tile } from './20-tile';
 
@@ -20,11 +20,11 @@ const sideToVector: Map<Side, [number, number]> = new Map([
   [Side.Left, [-1, 0]],
 ]);
 
-function assembleImage({
+function assembleTiles({
   tiles,
   borderToTiles,
   corners,
-}: Sim & Borders & Corners) {
+}: Sim & Borders & Corners): Tile[][] {
   // The image must be a square.
   const size = assert(Math.sqrt(tiles.length), (n) => Number.isInteger(n));
   const image: Tile[][] = Array.from({ length: size }, () => []);
@@ -56,7 +56,7 @@ function assembleImage({
       }
     }
   }
-  return image.map((r) => r.map((t) => t.id).join(' ')).join('\n');
+  return image;
 }
 
 function rotateUntilTopLeftCorner(
@@ -85,11 +85,72 @@ function rotateUntilTopLeftCorner(
   }
 }
 
+function removeBordersFromAllTiles(image: Tile[][]): Tile[][] {
+  const newImage: Tile[][] = [];
+  for (const rowOfTiles of image) {
+    const newRowOfTiles: Tile[] = [];
+    for (const tile of rowOfTiles) {
+      newRowOfTiles.push(removeBordersFromTile(tile));
+    }
+    newImage.push(newRowOfTiles);
+  }
+  return newImage;
+}
+
+function removeBordersFromTile(tile: Tile): Tile {
+  const tileGrid = tile
+    .to2DArray()
+    .slice(1, -1)
+    .map((row) => row.slice(1, -1).join(''));
+  return new Tile(tile.id, tileGrid);
+}
+
+function combineToImage(tiles: Tile[][]): string[][] {
+  const size = assert(tiles[0][0].size);
+  const image: string[][] = [];
+
+  for (const rowOfTiles of tiles) {
+    const newRows: string[][] = Array.from({ length: size }, () => []);
+
+    for (const tile of rowOfTiles) {
+      const grid = tile.to2DArray();
+      for (let i = 0; i < grid.length; i++) {
+        newRows[i].push(...grid[i]);
+      }
+    }
+
+    for (const row of newRows) {
+      image.push(row);
+    }
+  }
+
+  return image;
+}
+
+function toTile(image: string[][]): Tile {
+  return new Tile(
+    1,
+    image.map((r) => r.join(''))
+  );
+}
+
+function seaMonsterCount(tile: Tile): number {
+  return tile.size;
+}
+
 export function run() {
   declareProblem('day 20b');
   const sim = getSimulations()[1];
   timer.run(
-    pipe(addBorderToTiles, addCornerTiles, assembleImage),
+    pipe(
+      addBorderToTilesMapToSim,
+      addCornerTilesToSim,
+      assembleTiles,
+      removeBordersFromAllTiles,
+      combineToImage,
+      toTile,
+      seaMonsterCount
+    ),
     `day 20b - ${sim.name}`,
     sim
   );

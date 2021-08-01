@@ -36,7 +36,7 @@ export function getSimulations(): Sim[] {
   });
 }
 
-export function addBorderToTiles(sim: Sim): Sim & Borders {
+export function addBorderToTilesMapToSim(sim: Sim): Sim & Borders {
   const { tiles } = sim;
   // border -> Tile[]
   const borderToTiles = new Map<string, Tile[]>();
@@ -56,7 +56,9 @@ export function addBorderToTiles(sim: Sim): Sim & Borders {
   return { ...sim, borderToTiles };
 }
 
-export function addCornerTiles(sim: Sim & Borders): Sim & Borders & Corners {
+export function addCornerTilesToSim(
+  sim: Sim & Borders
+): Sim & Borders & Corners {
   const { tiles, borderToTiles } = sim;
   const corners: Tile[] = [];
   for (const tile of tiles) {
@@ -90,7 +92,7 @@ export function run() {
   declareProblem('day 20');
   const sim = getSimulations()[0];
   timer.run(
-    pipe(addBorderToTiles, addCornerTiles, multiply),
+    pipe(addBorderToTilesMapToSim, addCornerTilesToSim, multiply),
     `day 20 - ${sim.name}`,
     sim
   );
