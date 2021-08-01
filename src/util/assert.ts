@@ -22,7 +22,8 @@ export function assert<T>(
     typeof conditionOrMsg === 'function' &&
     (val == null || !conditionOrMsg(val!))
   ) {
-    throw new AssertionError(message);
+    // print either the explicit message, or the condition function.
+    throw new AssertionError(message ?? conditionOrMsg.toString());
   } else if (
     typeof conditionOrMsg === 'boolean' &&
     (val == null || !conditionOrMsg)
