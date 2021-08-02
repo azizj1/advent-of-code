@@ -104,8 +104,15 @@ export class Tile {
     return new BiMap(this.borders_);
   }
 
-  get(x: number, y: number) {
+  get(x: number, y: number): string {
     return this.grid1D[this.toIndex(x, y)];
+  }
+
+  getOrDefault(x: number, y: number): string | undefined {
+    if (x >= 0 && x < this.size && y >= 0 && y < this.size) {
+      return this.get(x, y);
+    }
+    return undefined;
   }
 
   private toIndex(x: number, y: number) {
@@ -162,7 +169,6 @@ export class Tile {
         this.reflectOverXAxis();
       }
     }
-    this.updateBorders();
     return {
       aligned: true,
       this: {
@@ -212,14 +218,14 @@ export class Tile {
     this.dirty = true;
   }
 
-  private reflectOverYAxis() {
+  reflectOverYAxis() {
     const [xc, yc] = this.cordsToIdxVector;
     const newConstant = this.toIndex(this.size - 1, 0);
     this.cordsToIdxVector = [-xc, yc, newConstant];
     this.dirty = true;
   }
 
-  private reflectOverXAxis() {
+  reflectOverXAxis() {
     const [xc, yc] = this.cordsToIdxVector;
     const newConstant = this.toIndex(0, this.size - 1);
     this.cordsToIdxVector = [xc, -yc, newConstant];

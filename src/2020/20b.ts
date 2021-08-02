@@ -134,8 +134,88 @@ function toTile(image: string[][]): Tile {
   );
 }
 
-function seaMonsterCount(tile: Tile): number {
-  return tile.size;
+const monsterImage = `
+                  #
+#    ##    ##    ###
+ #  #  #  #  #  #`;
+
+interface SeaMonsterResponse {
+  tile: Tile;
+  seaMonsterCount: number;
+}
+
+/**
+ * @param tile The entire image as a single tile.
+ */
+function getSeaMonsterCount(tile: Tile): SeaMonsterResponse {
+  // the first '#' should have a coordinate of (0,0), but it has a coordinate of
+  // (18, 0) ignoring the first empty line.
+  const monsterCords = monsterImage
+    .split('\n')
+    .slice(1) // the first line is an empty new line, so exclude that.
+    .map((row, y) => row.split('').map((col, x) => ({ x, y, col })))
+    .flat()
+    .filter((data) => data.col === '#')
+    .map((data) => ({ dx: data.x - 18, dy: data.y }));
+
+  const helper = (): number => {
+    let count = 0;
+    for (let i = 0; i < tile.size - 2; i++) {
+      for (let j = 18; j < tile.size; j++) {
+        const curr = tile.get(j, i);
+        if (
+          curr === '#' &&
+          monsterCords.every(
+            ({ dx, dy }) => tile.getOrDefault(j + dx, i + dy) === '#'
+          )
+        ) {
+          count++;
+        }
+      }
+    }
+    return count;
+  };
+
+  // 4 for the 4 rotations.
+  for (let i = 0; i < 4; i++) {
+    const seaMonsterCount = helper();
+    if (seaMonsterCount > 0) {
+      return { tile, seaMonsterCount };
+    }
+    tile.rotate90DegreesCW();
+  }
+
+  // try the 4 rotations again after a reflection (in either X or Y direction).
+  tile.reflectOverXAxis();
+
+  // 4 for the 4 rotations, but after the reflection.
+  for (let i = 0; i < 4; i++) {
+    const seaMonsterCount = helper();
+    if (seaMonsterCount > 0) {
+      return { tile, seaMonsterCount };
+    }
+    tile.rotate90DegreesCW();
+  }
+
+  throw new Error('No sea monster was found in any orientation.');
+}
+
+function getWaterRoughness({
+  tile,
+  seaMonsterCount,
+}: SeaMonsterResponse): number {
+  const hashtagsInMonsterSize = monsterImage
+    .split('')
+    .filter((c) => c === '#').length;
+  let hashtagsInTile = 0;
+  for (let i = 0; i < tile.size; i++) {
+    for (let j = 0; j < tile.size; j++) {
+      if (tile.get(j, i) === '#') {
+        hashtagsInTile++;
+      }
+    }
+  }
+  return hashtagsInTile - seaMonsterCount * hashtagsInMonsterSize;
 }
 
 export function run() {
@@ -149,7 +229,8 @@ export function run() {
       removeBordersFromAllTiles,
       combineToImage,
       toTile,
-      seaMonsterCount
+      getSeaMonsterCount,
+      getWaterRoughness
     ),
     `day 20b - ${sim.name}`,
     sim
