@@ -42,6 +42,9 @@ Work in progress.
   - Rules design
   - Regex subroutines
   - CYK algorithm
+- [Day 20 - Rotating Images](src/2020/20.md)
+  - Rotation/reflection of 2D arrays in `O(1)`.
+  - Finding sub-image inside image.
 
 ## 2019
 

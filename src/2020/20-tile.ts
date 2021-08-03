@@ -45,21 +45,30 @@ export class Tile {
   // c] to [-yc, xc, idx(0, w-1)].
   private cordsToIdxVector: [number, number, number];
 
-  constructor(readonly id: number, grid: string[]) {
+  constructor(readonly id: number, grid: string[][]) {
     this.size = grid.length;
     grid
       .map((r) => r.length)
       .forEach((l) => assert(l === this.size, 'Tile must be a square.'));
 
     this.cordsToIdxVector = [1, this.size, 0];
+    // Converts something like
+    //    a b c
+    //    d e f
+    //    g h i
+    // to this:
+    //    a, b, c, d, e, f, g, h, i
     this.grid1D = grid.flatMap((r) => [...r]);
     this.borders_ = new Map();
-    this.borders_.set(grid[0], Side.Top);
+    this.borders_.set(grid[0].join(''), Side.Top);
     this.borders_.set(grid.map((g) => last(g)).join(''), Side.Right);
-    this.borders_.set(reverse(last(grid)), Side.Down);
+    // going clockwise, so the bottom border goes from right to left. Have to do
+    // [...last(..] because reverse() is a mutable function.
+    this.borders_.set([...last(grid)].reverse().join(''), Side.Down);
+    // CW, so going from bottom to top for left side.
     this.borders_.set(
       grid
-        .map((g) => g[0])
+        .map((r) => r[0])
         .reverse()
         .join(''),
       Side.Left
@@ -90,14 +99,14 @@ export class Tile {
     return output;
   }
 
-  get borders() {
+  get borders(): Set<string> {
     if (this.dirty) {
       this.updateBorders();
     }
     return new Set(this.borders_.keys());
   }
 
-  get bordersLocation() {
+  get bordersLocation(): BiMap<string, Side> {
     if (this.dirty) {
       this.updateBorders();
     }
@@ -123,7 +132,7 @@ export class Tile {
   }
 
   /**
-   * Will align this Tile to the other tile if possible. What that means is that
+   * Will align this tile to the other tile if possible. What that means is that
    * if the other tile's right side is identical to this tile's top side, then
    * this function will rotate this tile so that this tile's top side becomes
    * its LEFT side, so that other tile and this tile can be right next to each
@@ -147,14 +156,14 @@ export class Tile {
     while (numOf90DegRotations-- > 0) {
       this.rotate90DegreesCW();
     }
-    // Imagine "other"'s top 2 lines are:
-    // ###..
-    // .....
-    // And "this"'s bottom two lines are:
+    // Imagine "this"'s bottom two lines are:
     // .....
     // ###..
+    // And "other"'s top 2 lines are:
+    // ###..
+    // .....
     // It looks like they don't have to be touched at all. Top/bottom are
-    // aligned, adn they look identical. However, since the borders are
+    // aligned, and they look identical. However, since the borders are
     // retrieved clockwise, in our borders_ Map, we'll have other's top border
     // equal to '###..', and this's bottom border eqaul to '..###'. So if they
     // have to be flipped, it means they're in the right orientation, and you

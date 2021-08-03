@@ -16,19 +16,19 @@ export function getSimulations(): Sim[] {
   return getRunsFromIniNewlineSep(input).map((sim) => {
     const tiles: Tile[] = [];
     let tileId: number | undefined = undefined;
-    let grid: string[] = [];
+    let grid: string[][] = [];
     for (const line of sim.content) {
       if (line.indexOf('Tile') === 0) {
         if (grid.length > 0) {
-          tiles.push(new Tile(assert(tileId), [...grid]));
+          tiles.push(new Tile(assert(tileId), grid));
         }
         grid = [];
         tileId = assert(Number(line.match(/\d+/)?.[0]), (n) => !isNaN(n));
       } else if (line[0] === '.' || line[0] === '#') {
-        grid.push(line);
+        grid.push(line.split(''));
       }
     }
-    tiles.push(new Tile(assert(tileId), [...grid]));
+    tiles.push(new Tile(assert(tileId), grid));
     return {
       name: sim.name,
       tiles,
@@ -36,6 +36,10 @@ export function getSimulations(): Sim[] {
   });
 }
 
+/**
+ * Maps a border to all the tiles that share that border. Each border should
+ * have 1 or 2 elements.
+ */
 export function addBorderToTilesMapToSim(sim: Sim): Sim & Borders {
   const { tiles } = sim;
   // border -> Tile[]
@@ -50,7 +54,15 @@ export function addBorderToTilesMapToSim(sim: Sim): Sim & Borders {
         borderToTiles.set(reversed, []);
       }
       borderToTiles.get(border)!.push(tile);
+      // we store each tile to the reverse of the border as well. This will make
+      // it easier to find other tiles on the same border, reversed or not. Tile
+      // X may have the reversed version of border B, but tile Y may have the
+      // original orientation of B. We want both X and Y to appear when looking
+      // up tiles under border B, or reverse(B).
       borderToTiles.get(reversed)!.push(tile);
+
+      assert(borderToTiles.get(border)!.length <= 2);
+      assert(borderToTiles.get(reversed)!.length <= 2);
     }
   }
   return { ...sim, borderToTiles };

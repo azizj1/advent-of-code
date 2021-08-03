@@ -101,7 +101,7 @@ function removeBordersFromTile(tile: Tile): Tile {
   const tileGrid = tile
     .to2DArray()
     .slice(1, -1)
-    .map((row) => row.slice(1, -1).join(''));
+    .map((row) => row.slice(1, -1));
   return new Tile(tile.id, tileGrid);
 }
 
@@ -128,10 +128,7 @@ function combineToImage(tiles: Tile[][]): string[][] {
 }
 
 function toTile(image: string[][]): Tile {
-  return new Tile(
-    1,
-    image.map((r) => r.join(''))
-  );
+  return new Tile(1, image);
 }
 
 const monsterImage = `
@@ -149,7 +146,8 @@ interface SeaMonsterResponse {
  */
 function getSeaMonsterCount(tile: Tile): SeaMonsterResponse {
   // the first '#' should have a coordinate of (0,0), but it has a coordinate of
-  // (18, 0) ignoring the first empty line.
+  // (18, 0), so we need to subract the 18.
+  // Also, ignoring the first empty line.
   const monsterCords = monsterImage
     .split('\n')
     .slice(1) // the first line is an empty new line, so exclude that.
@@ -158,17 +156,14 @@ function getSeaMonsterCount(tile: Tile): SeaMonsterResponse {
     .filter((data) => data.col === '#')
     .map((data) => ({ dx: data.x - 18, dy: data.y }));
 
+  const isMonsterAt = (x: number, y: number) =>
+    monsterCords.every((c) => tile.getOrDefault(x + c.dx, y + c.dy) === '#');
+
   const helper = (): number => {
     let count = 0;
     for (let i = 0; i < tile.size - 2; i++) {
       for (let j = 18; j < tile.size; j++) {
-        const curr = tile.get(j, i);
-        if (
-          curr === '#' &&
-          monsterCords.every(
-            ({ dx, dy }) => tile.getOrDefault(j + dx, i + dy) === '#'
-          )
-        ) {
+        if (isMonsterAt(j, i)) {
           count++;
         }
       }
@@ -223,13 +218,13 @@ export function run() {
   const sim = getSimulations()[1];
   timer.run(
     pipe(
-      addBorderToTilesMapToSim,
-      addCornerTilesToSim,
-      assembleTiles,
+      addBorderToTilesMapToSim, // Adds border -> Tile[] map to Simulation
+      addCornerTilesToSim, // Finds corner and adds to Simulation
+      assembleTiles, // Align each tile next to each other to build Tile[][]
       removeBordersFromAllTiles,
-      combineToImage,
-      toTile,
-      getSeaMonsterCount,
+      combineToImage, // Converts the Tile[][] to a string[][]
+      toTile, // Convert the entire image into a single Tile for easy rotation
+      getSeaMonsterCount, // Find sea monster, searching all 8 orientations
       getWaterRoughness
     ),
     `day 20b - ${sim.name}`,
