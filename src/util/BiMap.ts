@@ -15,11 +15,19 @@ export class BiMap<K, V> implements Iterable<[K, V]> {
     }
   }
 
+  getValues(key: K): V[] {
+    return this.keyMap.get(key) ?? [];
+  }
+
   getValue(key: K): V | undefined {
     if (this.keyMap.has(key)) {
       return this.keyMap.get(key)![0];
     }
     return undefined;
+  }
+
+  getKeys(val: V): K[] {
+    return this.valMap.get(val) ?? [];
   }
 
   getKey(val: V): K | undefined {
@@ -109,6 +117,22 @@ export class BiMap<K, V> implements Iterable<[K, V]> {
         yield [k, v];
       }
     }
+  }
+
+  keys() {
+    return this.keyMap.keys();
+  }
+
+  values() {
+    return this.valMap.keys();
+  }
+
+  toString() {
+    let output = '';
+    for (const [k, vals] of this.keyMap.entries()) {
+      output += `${k} -> ${vals.join(', ')}\n`;
+    }
+    return output;
   }
 
   get size() {
