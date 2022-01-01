@@ -34,10 +34,7 @@ module.exports = function (env) {
   const DEBUG = env.stage !== 'prod' && env.stage !== 'dev';
   const BABEL_CONFIG = {
     babelrc: false,
-    presets: [
-      ['@babel/env', { targets: { node: 'current' } }],
-      ['@babel/typescript'],
-    ],
+    presets: [['@babel/typescript']],
     plugins: [
       '@babel/plugin-proposal-class-properties',
       '@babel/plugin-proposal-object-rest-spread',

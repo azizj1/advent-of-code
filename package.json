@@ -6,14 +6,18 @@
   "scripts": {
     "watch": "webpack --watch --env.entry=watch-last-changed",
     "watch-single": "webpack --watch --env.entry=watch-single",
-    "start": "webpack --watch  --env.entry=watch-last-changed",
+    "start": "webpack --watch --env.entry=watch-last-changed",
     "test": "webpack --watch --env.entry=test"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/azizj1/advent-of-code.git"
   },
-  "keywords": ["advent", "of", "code"],
+  "keywords": [
+    "advent",
+    "of",
+    "code"
+  ],
   "author": "Aziz Javed",
   "license": "ISC",
   "bugs": {
@@ -25,25 +29,24 @@
   },
   "homepage": "https://github.com/azizj1/advent-of-code#readme",
   "devDependencies": {
-    "@babel/core": "^7.14.6",
-    "@babel/plugin-proposal-class-properties": "^7.7.4",
-    "@babel/plugin-proposal-numeric-separator": "^7.7.4",
-    "@babel/plugin-proposal-object-rest-spread": "^7.7.4",
+    "@babel/core": "^7.16.7",
+    "@babel/plugin-proposal-class-properties": "^7.16.7",
+    "@babel/plugin-proposal-numeric-separator": "^7.16.7",
+    "@babel/plugin-proposal-object-rest-spread": "^7.16.7",
     "@babel/plugin-syntax-bigint": "^7.8.3",
-    "@babel/preset-env": "^7.7.6",
-    "@babel/preset-typescript": "^7.14.5",
+    "@babel/preset-typescript": "^7.16.7",
     "@types/lodash": "^4.14.144",
     "@types/node": "^12.11.2",
     "@types/readline-sync": "^1.4.3",
-    "@typescript-eslint/eslint-plugin": "^4.28.1",
-    "@typescript-eslint/parser": "^4.28.1",
+    "@typescript-eslint/eslint-plugin": "^5.8.1",
+    "@typescript-eslint/parser": "^5.8.1",
     "babel-loader": "^8.0.6",
     "babel-plugin-lodash": "^3.3.4",
     "clean-webpack-plugin": "^3.0.0",
     "eslint": "^7.29.0",
     "fork-ts-checker-webpack-plugin": "^3.1.1",
     "raw-loader": "^4.0.0",
-    "typescript": "^4.3.4",
+    "typescript": "^4.3.5",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10"
   },

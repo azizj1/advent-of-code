@@ -14,7 +14,7 @@ export function assert<T>(
 ): NonNullable<T> {
   if (conditionOrMsg === undefined || typeof conditionOrMsg === 'string') {
     if (!val) {
-      throw new AssertionError(conditionOrMsg ?? message);
+      throw new AssertionError(conditionOrMsg || message);
     } else {
       return val!;
     }
@@ -23,7 +23,7 @@ export function assert<T>(
     (val == null || !conditionOrMsg(val!))
   ) {
     // print either the explicit message, or the condition function.
-    throw new AssertionError(message ?? conditionOrMsg.toString());
+    throw new AssertionError(message || conditionOrMsg.toString());
   } else if (
     typeof conditionOrMsg === 'boolean' &&
     (val == null || !conditionOrMsg)
