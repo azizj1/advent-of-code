@@ -9,6 +9,12 @@ My solutions to [Advent of Code](https://adventofcode.com/) problems.
    1. Run and watch a single file via `yarn watch-single`, or
    2. Run and watch the last file changed under a [specific year](src/watch-last-changed.ts) via `yarn start`.
 
+## 2021
+
+Not advent of code, but just a fun problem I found on MorningBrew:
+
+1. [MorningBrew - Minimum plus/minus to get sum of 100](src/2021/morningbrew.md)
+
 ## 2020
 
 Work in progress.
