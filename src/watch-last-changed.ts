@@ -19,14 +19,14 @@ async function getLatestFile(dir: string, files: string[]) {
 }
 
 export async function runLastChanged() {
-  const dir = '2021';
+  const dir = '2022';
   const file = await getLatestFile(dir, await getFiles(dir));
   const sanitized = file.replace(/(src)|(\.ts)/g, '');
   // dir is hard-coded again below because without, dynamic import will build every file that ends with *.ts
   // with it being hard-coded, it'll only build files that satisfy ./2018/*.ts
   try {
     const p = await import(
-      /* webpackChunkName: "customProblem" */ `./2021/${sanitized}.ts`
+      /* webpackChunkName: "customProblem" */ `./2022/${sanitized}.ts`
     );
     if (typeof p.test === 'function') {
       p.test();
