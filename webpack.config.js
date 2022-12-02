@@ -35,13 +35,7 @@ module.exports = function (env) {
   const BABEL_CONFIG = {
     babelrc: false,
     presets: [['@babel/typescript']],
-    plugins: [
-      '@babel/plugin-proposal-class-properties',
-      '@babel/plugin-proposal-object-rest-spread',
-      '@babel/plugin-proposal-numeric-separator',
-      '@babel/plugin-syntax-bigint',
-      'lodash',
-    ],
+    plugins: ['@babel/plugin-syntax-bigint'],
     cacheDirectory: DEBUG,
   };
 
@@ -90,7 +84,10 @@ module.exports = function (env) {
       ],
     },
     plugins: [
-      new ForkTsCheckerWebpackPlugin({ eslint: true, logger: new Logger() }),
+      new ForkTsCheckerWebpackPlugin({
+        eslint: { enabled: true, files: 'src/**/*' },
+        logger: new Logger(),
+      }),
       ...(DEBUG ? [shellPlugin] : [new CleanPlugin([BUILD_DIR])]),
     ],
     cache: DEBUG,

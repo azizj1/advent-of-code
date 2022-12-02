@@ -4,10 +4,10 @@
   "description": "Solutions for https://adventofcode.com/",
   "main": "index.js",
   "scripts": {
-    "watch": "webpack --watch --env.entry=watch-last-changed",
-    "watch-single": "webpack --watch --env.entry=watch-single",
-    "start": "webpack --watch --env.entry=watch-last-changed",
-    "test": "webpack --watch --env.entry=test"
+    "watch": "webpack --watch --env entry=watch-last-changed",
+    "watch-single": "webpack --watch --env entry=watch-single",
+    "start": "webpack --watch --env entry=watch-last-changed",
+    "test": "webpack --watch --env entry=test"
   },
   "repository": {
     "type": "git",
@@ -30,32 +30,26 @@
   "homepage": "https://github.com/azizj1/advent-of-code#readme",
   "devDependencies": {
     "@babel/core": "^7.16.7",
-    "@babel/plugin-proposal-class-properties": "^7.16.7",
-    "@babel/plugin-proposal-numeric-separator": "^7.16.7",
-    "@babel/plugin-proposal-object-rest-spread": "^7.16.7",
     "@babel/plugin-syntax-bigint": "^7.8.3",
     "@babel/preset-typescript": "^7.16.7",
-    "@types/lodash": "^4.14.144",
     "@types/node": "^12.11.2",
     "@types/readline-sync": "^1.4.3",
-    "@typescript-eslint/eslint-plugin": "^5.8.1",
-    "@typescript-eslint/parser": "^5.8.1",
-    "babel-loader": "^8.0.6",
-    "babel-plugin-lodash": "^3.3.4",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "babel-loader": "^8.2.3",
     "clean-webpack-plugin": "^3.0.0",
-    "eslint": "^7.29.0",
-    "fork-ts-checker-webpack-plugin": "^3.1.1",
+    "eslint": "^8.3.0",
+    "fork-ts-checker-webpack-plugin": "^6.5.0",
     "raw-loader": "^4.0.0",
-    "typescript": "^4.3.5",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10"
+    "typescript": "^4.5.2",
+    "webpack": "^5.64.4",
+    "webpack-cli": "^4.9.1"
   },
   "dependencies": {
     "bignumber.js": "^9.0.0",
     "chalk": "^2.4.2",
     "decimal.js": "^10.2.0",
     "fs": "^0.0.1-security",
-    "lodash": "^4.17.15",
     "moment": "^2.24.0",
     "readline-sync": "^1.4.10",
     "winston": "^3.2.1"
