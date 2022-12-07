@@ -35,7 +35,10 @@ module.exports = function (env) {
   const BABEL_CONFIG = {
     babelrc: false,
     presets: [['@babel/typescript']],
-    plugins: ['@babel/plugin-syntax-bigint'],
+    plugins: [
+      '@babel/plugin-syntax-bigint',
+      '@babel/plugin-proposal-logical-assignment-operators',
+    ],
     cacheDirectory: DEBUG,
   };
 
