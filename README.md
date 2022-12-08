@@ -38,6 +38,7 @@ Work in progress.
   - Fun with prime numbers.
 - [Day 16 - Ticket Translation](src/2020/16.md)
   - Constraint satisfaction problem (CSP)
+  - PriorityQueue to solve CSPs
 - [Day 17 - Conway Cube](src/2020/17.md)
   - ArrayDeques
   - InfiniteGrid
@@ -51,6 +52,10 @@ Work in progress.
 - [Day 20 - Rotating Images](src/2020/20.md)
   - Rotation/reflection of 2D arrays in `O(1)`.
   - Finding sub-image inside image.
+- [Day 21 - Allergen Assessment](src/2020/21.md)
+  - Constraint satisfaction problem (CSP)
+    - Uses Python to formulate and solve integer programming problem!
+  - PriorityQueue to solve CSPs
 
 ## 2019
 
