@@ -2,11 +2,11 @@
 // put the import inside the try/catch, which was important before I did the p2.run(). Before, all the commands were
 // within the file and not a function, so just importing it would run the code.
 export async function run() {
-    try {
-        const p = await import(/* webpackChunkName: "problem1" */ './2018/8');
-        p.run();
-    } catch (e) {
-        console.error(e);
-    }
+  try {
+    const p = await import(/* webpackChunkName: "problem1" */ './2020/21');
+    p.run();
+  } catch (e) {
+    console.error(e);
+  }
 }
 run(); // run a single file

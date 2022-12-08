@@ -153,23 +153,27 @@ function getIngredientsWithAllergens(
 }
 
 export function run() {
-  const sim = getSimulations()[1];
+  const sims = getSimulations();
   declareProblem('day 21');
-  timer.run(
-    () =>
-      getIngredientFrequency(
-        getIngredientsWithNoAllergens(
-          getPotentialIngredientsForAllergens(sim),
+  for (const sim of sims) {
+    timer.run(
+      () =>
+        getIngredientFrequency(
+          getIngredientsWithNoAllergens(
+            getPotentialIngredientsForAllergens(sim),
+            sim
+          ),
           sim
         ),
-        sim
-      ),
-    `day 21 - ${sim.name}`
-  );
+      sim.name
+    );
+  }
   declareProblem('day 21 PART 2');
-  timer.run(
-    pipe(getPotentialIngredientsForAllergens, getIngredientsWithAllergens),
-    `day 21 - ${sim.name}`,
-    sim
-  );
+  for (const sim of sims) {
+    timer.run(
+      pipe(getPotentialIngredientsForAllergens, getIngredientsWithAllergens),
+      sim.name,
+      sim
+    );
+  }
 }
