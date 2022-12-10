@@ -9,6 +9,11 @@ My solutions to [Advent of Code](https://adventofcode.com/) problems.
    1. Run and watch a single file via `yarn watch-single`, or
    2. Run and watch the last file changed under a [specific year](src/watch-last-changed.ts) via `yarn start`.
 
+## 2022
+
+7. [Day 7 - No Space Left On Device](src/2022/7.md)
+   - Iterator pattern
+
 ## 2021
 
 Not advent of code, but just a fun problem I found on MorningBrew:
