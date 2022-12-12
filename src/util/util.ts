@@ -52,6 +52,16 @@ export const getRunsFromIniNewlineSep = (content: string) =>
     content: content.split(/\r?\n/).filter((s) => s.trim() !== ''),
   }));
 
+export const getRunsFromIniEmptyLineSep = (content: string) =>
+  getRunsFromIniFile(content).map(({ name, content, properties }) => ({
+    name,
+    properties,
+    content: content
+      .split(/(?:\r?\n){2,}/)
+      .filter((s) => s.trim() !== '')
+      .map((c) => c.split(/\r?\n/).filter((s) => s.trim() !== '')),
+  }));
+
 let savedConsoleInfo: ((message?: string) => void) | null = null;
 export const dropConsoleInfo = () => {
   savedConsoleInfo = console.info;
