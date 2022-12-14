@@ -1,6 +1,6 @@
 import { Coordinate } from '~/util/Coordinate';
-// import { GenericSet } from '~/util/GenericSet';
-import { PriorityQueue } from '~/util/PriorityQueue';
+import { GenericSet } from '~/util/GenericSet';
+import { Queue } from '~/util/Queue';
 import { timer } from '~/util/Timer';
 import { getRunsFromIniNewlineSep } from '~/util/util';
 import input from './12.txt';
@@ -52,7 +52,7 @@ class Heightmap {
         point: new Coordinate(x + dx, y + dy),
         elevation: this.grid[y + dy]?.[x + dx],
       }))
-      .filter((sq) => sq.elevation >= 0 && sq.elevation - elevation <= 1);
+      .filter((sq) => sq.elevation - elevation <= 1);
   }
 
   getStarting() {
@@ -77,11 +77,9 @@ class Heightmap {
 }
 
 function getMinStepsToEnd({ grid }: Simulation) {
-  // goal is to get to the highest elevation.
   type QueueItem = { point: Coordinate; steps: number; elevation: number };
-  const queue = new PriorityQueue<QueueItem>((item) => -item.steps);
-  const visited = new Map<string, number>();
-  visited.set(grid.getStarting().point.toString(), 0);
+  const queue = new Queue<QueueItem>();
+  const visited = new GenericSet<Coordinate>((c) => c.toString());
 
   const ending = grid.getEnding();
   queue.enqueue({ ...grid.getStarting(), steps: 0 });
@@ -93,12 +91,9 @@ function getMinStepsToEnd({ grid }: Simulation) {
     const squares = grid.getAccessibleSquares(point);
     const nextSteps = steps + 1;
     for (const { elevation, point } of squares) {
-      if (
-        !visited.has(point.toString()) ||
-        visited.get(point.toString())! > nextSteps
-      ) {
-        visited.set(point.toString(), nextSteps);
+      if (!visited.has(point)) {
         queue.enqueue({ elevation, point, steps: nextSteps });
+        visited.add(point);
       }
     }
   }
