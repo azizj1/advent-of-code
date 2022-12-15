@@ -8,4 +8,8 @@ export class Coordinate {
   toString() {
     return `(${this.x}, ${this.y})`;
   }
+
+  static manhattanDistance(a: Coordinate, b: Coordinate) {
+    return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+  }
 }
