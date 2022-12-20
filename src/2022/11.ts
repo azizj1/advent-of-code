@@ -1,6 +1,6 @@
 import { assert } from '~/util/assert';
 import { timer } from '~/util/Timer';
-import { getRunsFromIniEmptyLineSep, pipe } from '~/util/util';
+import { declareProblem, getRunsFromIniEmptyLineSep, pipe } from '~/util/util';
 import input from './11.txt';
 
 interface Monkey {
@@ -64,10 +64,18 @@ function getSimulations(): Simulation[] {
 }
 
 function runRounds(sim: Simulation, rounds: number) {
+  const k = Array.from(sim.monkeys.values()).reduce(
+    (mult, m) => mult * m.divisibleByTest,
+    1
+  );
   for (let i = 0; i < rounds; i++) {
     for (const monkey of sim.monkeys.values()) {
       for (const item of monkey.items) {
-        const newWorryLevel = monkey.operation(item);
+        let newWorryLevel = monkey.operation(item);
+        if (newWorryLevel > k) {
+          const multiple = Math.floor(newWorryLevel / k);
+          newWorryLevel -= k * multiple;
+        }
         const passesTest = newWorryLevel % monkey.divisibleByTest === 0;
         if (passesTest) {
           sim.monkeys
@@ -97,6 +105,7 @@ function getMonkeyBusiness(inspections: { inspected: number }[]) {
 }
 
 export function run() {
+  declareProblem('2022 day 11');
   const sims = getSimulations();
   for (const sim of sims) {
     timer.run(() => {

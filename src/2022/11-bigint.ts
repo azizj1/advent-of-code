@@ -1,6 +1,6 @@
 import { assert } from '~/util/assert';
 import { timer } from '~/util/Timer';
-import { getRunsFromIniEmptyLineSep, pipe } from '~/util/util';
+import { declareProblem, getRunsFromIniEmptyLineSep, pipe } from '~/util/util';
 import input from './11.txt';
 
 /*
@@ -71,13 +71,22 @@ function getSimulations(): Simulation[] {
   });
 }
 
-function runRounds(sim: Simulation, rounds: number, reduceWorryBy: bigint) {
+function runRounds(sim: Simulation, rounds: number) {
+  const k = Array.from(sim.monkeys.values()).reduce(
+    (mult, m) => mult * m.divisibleByTest,
+    1n
+  );
   for (let i = 0; i < rounds; i++) {
     for (const monkey of sim.monkeys.values()) {
       for (const item of monkey.items) {
-        const newWorryLevel = monkey.operation(item) / reduceWorryBy;
+        let newWorryLevel = monkey.operation(item);
         // console.log('monkey', monkey.id, 'item', item, 'worry', newWorryLevel);
         const passesTest = newWorryLevel % monkey.divisibleByTest === 0n;
+        if (newWorryLevel > k) {
+          const multiple = newWorryLevel / k;
+          newWorryLevel -= k * multiple;
+          // console.log('subtract!', newWorryLevel);
+        }
         if (passesTest) {
           sim.monkeys
             .get(monkey.monkeyIdToThrowToIfTestPasses)!
@@ -106,11 +115,12 @@ function getMonkeyBusiness(inspections: { inspected: number }[]) {
 }
 
 export function run() {
+  declareProblem('2022 day 11 BIGINT');
   const sims = getSimulations();
   for (const sim of sims) {
     timer.run(() => {
       // Doesn't work for part 2 because it's super slow.
-      runRounds(sim, 10_000, 1n);
+      runRounds(sim, 10_000);
       // console.log(sim.monkeys);
       console.log(pipe(getActiveMonkeys, getMonkeyBusiness)(sim, 2));
     }, sim.name);

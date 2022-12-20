@@ -11,8 +11,14 @@ My solutions to [Advent of Code](https://adventofcode.com/) problems.
 
 ## 2022
 
-7. [Day 7 - No Space Left On Device](src/2022/7.md)
+1. [Day 7 - No Space Left On Device](src/2022/7.md)
    - Iterator pattern
+1. [Day 11 - Monkey in the Middle](src/2022/11.md)
+   - How to a keep a number small without impacting its divisibility by a
+     specific number
+   - LCM
+1. [Day 12 - Hill Climbing Algorithm](src/2022/12.md)
+   - Dijkstra's algorithm and tips on it
 
 ## 2021
 
@@ -115,3 +121,17 @@ All problems are complete, but only some are worthy of notes:
   - Linear Regression
 - [Day 13](src/2018/13.md)
   - Rotation and Reflection Matrices
+
+# General problem solving tips
+
+1. Try reducing the problem space down. If there's 10 valves, or 8 monkeys, or
+   30 doors, etc. Imagine if there was just 1 or 2 valves or monkeys or doors.
+   Solve that smaller problem space first.
+2. Look at the input, make sure there isn't any shortcut you can take. Maybe
+   some monkeys you'll never visit, or some doors that don't ever have to be
+   opened, or some valves you don't have to release pressure on because flow is
+   0, etc.
+3. Transform the problem space. This came in handy for [2019 day
+   18a](src/2019/18.md) and [2022 day 16](src/2022/16.md). Convert the problem
+   into a graph, or an adjacency matrix, etc. that is much easier to work on
+   because of fewer variables.
