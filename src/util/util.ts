@@ -151,3 +151,7 @@ export function getSpace(startVector: number[], endVector: number[]) {
   helper([]);
   return result;
 }
+
+export function isNonNull<T>(o: T): o is NonNullable<T> {
+  return o !== undefined && o !== null;
+}

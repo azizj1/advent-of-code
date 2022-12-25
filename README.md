@@ -30,6 +30,10 @@ My solutions to [Advent of Code](https://adventofcode.com/) problems.
    - LCM
 1. [Day 12 - Hill Climbing Algorithm](src/2022/12.md)
    - Dijkstra's algorithm and tips on it
+1. [Day 19 - Not Enough Minerals](src/2022/19.md)
+   - Constraint satisfaction problem (CSP)
+   - Python to solve the linear programming problem
+   - Typescript for heuristic solution
 
 ## 2021
 
