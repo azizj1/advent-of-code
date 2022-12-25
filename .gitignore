@@ -3,3 +3,6 @@ logs/
 build/
 .DS_Store
 output.txt
+*.egg-info/
+__pycache__/
+

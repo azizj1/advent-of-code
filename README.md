@@ -2,12 +2,23 @@
 
 My solutions to [Advent of Code](https://adventofcode.com/) problems.
 
-#### Quick Start
+## Quick Start
+
+### NodeJS
 
 1. Install dependencies via `yarn install`.
 2. Two options:
    1. Run and watch a single file via `yarn watch-single`, or
    2. Run and watch the last file changed under a [specific year](src/watch-last-changed.ts) via `yarn start`.
+
+### Python
+
+1. Change directory `cd python`.
+1. Install `virtualenv` via `pip3 install virtualenv`.
+1. Run `virtualenv ./env`.
+1. Run `source ./env/bin/activate`.
+1. Run `pip install -r py-requirements.txt`.
+1. Run `nodemon --exec python 2022/19.py`.
 
 ## 2022
 
