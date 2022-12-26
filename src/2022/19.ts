@@ -1,7 +1,6 @@
 import { assert } from '~/util/assert';
-import { Queue } from '~/util/Queue';
 import { timer } from '~/util/Timer';
-import { getRunsFromIniNewlineSep, isNonNull } from '~/util/util';
+import { getRunsFromIniNewlineSep } from '~/util/util';
 import input from './19.txt';
 
 interface Cost {
@@ -79,6 +78,7 @@ export function solve1(blueprint: Blueprint) {
 
     const stateStr = serialize(state, timeRemaining);
     if (visited.has(stateStr)) return visited.get(stateStr)!;
+    // Heuristic #1
     if (potentialGeodes({ ...state, timeRemaining }) < gmaxGeodes) {
       return 0;
     }
@@ -86,6 +86,7 @@ export function solve1(blueprint: Blueprint) {
     let newState: State | undefined = collectResources(state);
     let maxGeodes = newState.resourcesAvailable.geode;
     // Option #1: don't build anything. Just have the robots collect resources.
+    // Heuristic #2
     if (addMoreResources(newState, blueprint)) {
       maxGeodes = Math.max(maxGeodes, helper(newState, timeRemaining - 1));
       gmaxGeodes = Math.max(gmaxGeodes, maxGeodes);
@@ -95,8 +96,8 @@ export function solve1(blueprint: Blueprint) {
       maxGeodes = Math.max(maxGeodes, helper(newState, timeRemaining - 1));
       gmaxGeodes = Math.max(gmaxGeodes, maxGeodes);
     }
-    if ((newState = buildRobot(blueprint, 'ore', state))) {
-      // Option#3: See if you can build an ore robot
+    if ((newState = buildRobot(blueprint, 'obsidian', state))) {
+      // Option#3: See if you can build a obsidian robot
       maxGeodes = Math.max(maxGeodes, helper(newState, timeRemaining - 1));
       gmaxGeodes = Math.max(gmaxGeodes, maxGeodes);
     }
@@ -105,8 +106,8 @@ export function solve1(blueprint: Blueprint) {
       maxGeodes = Math.max(maxGeodes, helper(newState, timeRemaining - 1));
       gmaxGeodes = Math.max(gmaxGeodes, maxGeodes);
     }
-    if ((newState = buildRobot(blueprint, 'obsidian', state))) {
-      // Option#5: See if you can build a obsidian robot
+    if ((newState = buildRobot(blueprint, 'ore', state))) {
+      // Option#5: See if you can build an ore robot
       maxGeodes = Math.max(maxGeodes, helper(newState, timeRemaining - 1));
       gmaxGeodes = Math.max(gmaxGeodes, maxGeodes);
     }
@@ -123,47 +124,10 @@ export function solve1(blueprint: Blueprint) {
   return ans;
 }
 
-export function solve1bfs(blueprint: Blueprint) {
-  // serialized state to # of geodes
-  const visited = new Map<string, number>();
-  const queue = new Queue<State & { timeRemaining: number }>();
-  let maxState = {
-    resourcesAvailable: { ore: 0, clay: 0, obsidian: 0, geode: 0 },
-    robots: { ore: 1, clay: 0, obsidian: 0, geode: 0 },
-    timeRemaining: 24,
-  };
-  queue.enqueue(maxState);
-  visited.set(serialize(maxState, 24), 0);
-  while (!queue.isEmpty()) {
-    const state = queue.dequeue()!;
-    const newState = collectResources(state);
-    newState.timeRemaining--;
-
-    if (newState.resourcesAvailable.geode > maxState.resourcesAvailable.geode) {
-      maxState = newState;
-    }
-    if (state.timeRemaining <= 1) continue;
-    // Next states with trying to build robots.
-    const nextStates = (['ore', 'clay', 'obsidian', 'geode'] as const)
-      .map((type) => buildRobot(blueprint, type, state))
-      .filter(isNonNull);
-    for (const nextState of nextStates) {
-      nextState.timeRemaining--;
-      if (potentialGeodes(nextState) > maxState.resourcesAvailable.geode) {
-        queue.enqueue(nextState);
-      }
-    }
-    if (addMoreResources(newState, blueprint)) {
-      queue.enqueue(newState);
-    }
-  }
-  return maxState;
-}
-
 /**
  * If you have enough resources to build any robot, don't bother with collecting
- * more resources. You should be building bots + collecting resources at the
- * same time.
+ * more resources (causing this function to return false). You should instead be
+ * building bots + collecting resources at the same time.
  */
 function addMoreResources(state: State, blueprint: Blueprint): boolean {
   const { ore, clay, obsidian } = state.resourcesAvailable;
@@ -192,6 +156,24 @@ function addMoreResources(state: State, blueprint: Blueprint): boolean {
   return false;
 }
 
+/**
+ * Given there are N minutes left, what's the max number of geodes can you make
+ * if you have infinite resources? It's the sum of
+ *    * number of geodes you already have
+ *    * number of geode robots you have * timeRemaining
+ *        - E.g., if you have two robots and 5 remaining minutes, you'll make 10 geodes.
+ *    * (timeRemaining-1) + (timeRemaining-2) + .. + 1
+ *             = (timeRemaining) * (timeRemaining - 1) / 2
+ *        - This is assuming you have infinite resources and you can build a
+ *        geode every minute. If you have 2 miutes left, you can build a robot
+ *        at t=2, and that robot can create 1 geode.
+ *        - If you have 3 minutes left, you build a robot#1 at t=3, which would
+ *        collect 2 geodes before time ran out. You build robot #2 at t=2, which
+ *        would collect 1 geode.
+ *        - With 4 minute left, you'd end up with 3 + 2 + 1 = 6 geode.
+ *        - With N minute left, you'd end up with (N-1) + (N-2) + .. + 1 =
+ *          N(N-1)/2 geodes.
+ */
 function potentialGeodes({
   timeRemaining,
   ...state
