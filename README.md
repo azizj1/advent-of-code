@@ -30,10 +30,20 @@ My solutions to [Advent of Code](https://adventofcode.com/) problems.
    - LCM
 1. [Day 12 - Hill Climbing Algorithm](src/2022/12.md)
    - Dijkstra's algorithm and tips on it
+1. [Day 15 - Beacon Exclusion Zone](src/2022/15.md)
+   - Merge intervals/ranges
+   - Complement of intervals/ranges
+1. [Day 16 - Proboscidea Volcanium](src/2022/16.md)
+   - TODO
+   - Floyd–Warshall algorithm
+   - DFS with backtracking one option but not others
 1. [Day 19 - Not Enough Minerals](src/2022/19.md)
    - Constraint satisfaction problem (CSP)
    - Python to solve the linear programming problem
    - Typescript for heuristic solution
+1. [Day 21 - Monkey Math](src/2022/21.md)
+   - TODO
+   - Plot it out and use linear regression
 
 ## 2021
 
