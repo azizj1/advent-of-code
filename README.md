@@ -40,7 +40,7 @@ My solutions to [Advent of Code](https://adventofcode.com/) problems.
 1. [Day 19 - Not Enough Minerals](src/2022/19.md)
    - Constraint satisfaction problem (CSP)
    - Python to solve the linear programming problem
-   - Typescript for heuristic solution
+   - Typescript - Depth-first branch and bound relaxation
 1. [Day 21 - Monkey Math](src/2022/21.md)
    - TODO
    - Plot it out and use linear regression

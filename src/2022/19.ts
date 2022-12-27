@@ -78,7 +78,7 @@ export function solve1(blueprint: Blueprint) {
 
     const stateStr = serialize(state, timeRemaining);
     if (visited.has(stateStr)) return visited.get(stateStr)!;
-    // Heuristic #1
+    // Heuristic #1: Branch and bound
     if (potentialGeodes({ ...state, timeRemaining }) < gmaxGeodes) {
       return 0;
     }
