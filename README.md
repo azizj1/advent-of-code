@@ -34,7 +34,6 @@ My solutions to [Advent of Code](https://adventofcode.com/) problems.
    - Merge intervals/ranges
    - Complement of intervals/ranges
 1. [Day 16 - Proboscidea Volcanium](src/2022/16.md)
-   - TODO
    - Floyd–Warshall algorithm
    - DFS with backtracking one option but not others
 1. [Day 19 - Not Enough Minerals](src/2022/19.md)

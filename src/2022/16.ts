@@ -52,6 +52,7 @@ function findMaxPressureRelease({ valves }: Simulation) {
 
     const valve = valves.get(valveName)!;
     let maxFlow = { released: -Infinity, opened: new Set<string>() };
+    // Consider all subsequent valves.
     for (const nextValve of valve.leadToValves) {
       const options = [helper(nextValve, remainingTime - 1, openedValve)];
       if (valve.flowRate > 0 && !openedValve.has(valveName)) {
@@ -76,6 +77,11 @@ function findMaxPressureRelease({ valves }: Simulation) {
   return ans;
 }
 
+/**
+ * This is a failed attempt at part 2. It doesn't work because the search space
+ * is too large. I need to reduce it by using Floyd–Warshall Algorithm. See
+ * 16b.ts.
+ */
 export function findMaxPressureRelease2({ valves }: Simulation) {
   const visited = new Map<string, number>();
   let cachehit = 0;
