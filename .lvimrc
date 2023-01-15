@@ -1,0 +1,8 @@
+" Open input file
+nnoremap <leader>oi :execute ':edit ' . substitute(expand('%:r'), '\v\d\zs\D+$', '', '') . '.txt'<CR>
+" Open code
+nnoremap <leader>oc :execute ':edit ' . substitute(expand('%:r'), '\v\d\zs\D+$', '', '') . '.ts'<CR>
+" Open code part b
+nnoremap <leader>ocb :execute ':edit ' . substitute(expand('%:r'), '\v\d\zs\D+$', '', '') . 'b.ts'<CR>
+" Open readme for problem
+nnoremap <leader>or :execute ':edit ' . substitute(expand('%:r'), '\v\d\zs\D+$', '', '') . '.md'<CR>
